@@ -5,6 +5,7 @@ import pluginReact from "eslint-plugin-react";
 import { defineConfig, globalIgnores } from "eslint/config";
 import autoImports from "./.wxt/eslint-auto-imports.mjs";
 import reactHooks from "eslint-plugin-react-hooks";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
 
 export default defineConfig([
   globalIgnores([".output/**", ".wxt/**"]),
@@ -26,4 +27,5 @@ export default defineConfig([
     },
   },
   reactHooks.configs.flat.recommended,
+  eslintConfigPrettier,
 ]);
