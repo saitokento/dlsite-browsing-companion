@@ -1,4 +1,4 @@
-name: Build
+name: Release
 
 on:
   push:
@@ -8,6 +8,10 @@ on:
 jobs:
   submit:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v5
 
@@ -24,8 +28,12 @@ jobs:
           npm run zip
           npm run zip:firefox
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+      - name: Create GitHub Release and upload zips
+        uses: softprops/action-gh-release@v2
         with:
-          name: extension-packages
-          path: .output/*.zip
+          draft: true
+          files: |
+            .output/*.zip
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
