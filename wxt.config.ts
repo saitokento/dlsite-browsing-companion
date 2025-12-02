@@ -8,4 +8,5 @@ export default defineConfig({
     description: "",
     version: "0.0.0",
   },
+  srcDir: "src",
 });
