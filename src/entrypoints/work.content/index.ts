@@ -1,6 +1,6 @@
 export default defineContentScript({
-  matches: ["*://*.dlsite.com/*"],
+  matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
   main() {
-    //console.log("Hello content.");
+    console.log("Hello content.");
   },
 });
