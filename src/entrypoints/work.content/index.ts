@@ -77,7 +77,8 @@ function fetchGenres(doc: Document): string[] {
 
 function fetchDescription(doc: Document): string {
   const description: string =
-    doc.querySelector(".work_parts_area")?.textContent?.trim() || "";
+    doc.querySelector('[itemprop="description"].work_parts_container')
+      ?.innerHTML || "";
 
   return description;
 }
