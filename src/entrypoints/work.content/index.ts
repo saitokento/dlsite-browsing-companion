@@ -1,4 +1,5 @@
 import { WorkInfo, Price } from "@/utils/types";
+import TurndownService from "turndown";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
@@ -76,9 +77,20 @@ function fetchGenres(doc: Document): string[] {
 }
 
 function fetchDescription(doc: Document): string {
-  const description: string =
+  const descriptionHtml: string =
     doc.querySelector('[itemprop="description"].work_parts_container')
       ?.innerHTML || "";
+
+  const turndownService = new TurndownService({
+    headingStyle: "atx",
+    hr: "---",
+    bulletListMarker: "-",
+    codeBlockStyle: "fenced",
+    emDelimiter: "*",
+    strongDelimiter: "**",
+  });
+
+  const description = turndownService.turndown(descriptionHtml);
 
   return description;
 }
