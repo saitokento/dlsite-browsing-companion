@@ -61,7 +61,7 @@ function fetchOfficialPrice(doc: Document): Price {
 function fetchCouponPrice(doc: Document): Price | null {
   const amountElement = doc.querySelector(".coupon_available .work_price_base");
   const amount: number | null = amountElement?.textContent
-    ? Number(amountElement.textContent)
+    ? Number(amountElement.textContent.replace(/,/g, ""))
     : null;
 
   if (amount == null) {
