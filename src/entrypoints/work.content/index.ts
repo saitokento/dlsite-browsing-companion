@@ -11,6 +11,7 @@ export default defineContentScript({
 function fetchWorkInfo(doc: Document): WorkInfo {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
   const price: Price = fetchPrice(doc);
+  const official_price: Price = fetchOfficialPrice(doc);
   const coupon_price: Price | null = fetchCouponPrice(doc);
   const genres: string[] = fetchGenres(doc);
   const description: string = fetchDescription(doc);
@@ -18,6 +19,7 @@ function fetchWorkInfo(doc: Document): WorkInfo {
   return {
     name,
     price,
+    official_price,
     coupon_price,
     genres,
     description,
@@ -29,6 +31,22 @@ function fetchPrice(doc: Document): Price {
     doc
       .querySelector("#work_buy_box_wrapper [data-price]")
       ?.getAttribute("data-price") || 0,
+  );
+
+  const [prefix, suffix]: string[] = fetchPriceAffix(doc);
+
+  return {
+    prefix,
+    amount,
+    suffix,
+  };
+}
+
+function fetchOfficialPrice(doc: Document): Price {
+  const amount: number = Number(
+    doc
+      .querySelector("#work_buy_box_wrapper [data-official_price]")
+      ?.getAttribute("data-official_price") || 0,
   );
 
   const [prefix, suffix]: string[] = fetchPriceAffix(doc);
