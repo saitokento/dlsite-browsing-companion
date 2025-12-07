@@ -1,4 +1,4 @@
-import { WorkInfo, Price } from "@/utils/types";
+import { WorkInfo } from "@/utils/types";
 import TurndownService from "turndown";
 import { sendMessage } from "@/utils/messaging";
 
@@ -14,9 +14,10 @@ export default defineContentScript({
 
 function fetchWorkInfo(doc: Document): WorkInfo {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
-  const price: Price = fetchPrice(doc);
-  const official_price: Price = fetchOfficialPrice(doc);
-  const coupon_price: Price | null = fetchCouponPrice(doc);
+  const price: number = fetchPrice(doc);
+  const official_price: number = fetchOfficialPrice(doc);
+  const coupon_price: number | null = fetchCouponPrice(doc);
+  const [prefix, suffix]: string[] = fetchPriceAffixes(doc);
   const genres: string[] = fetchGenres(doc);
   const description: string = fetchDescription(doc);
 
@@ -25,44 +26,34 @@ function fetchWorkInfo(doc: Document): WorkInfo {
     price,
     official_price,
     coupon_price,
+    prefix,
+    suffix,
     genres,
     description,
   };
 }
 
-function fetchPrice(doc: Document): Price {
+function fetchPrice(doc: Document): number {
   const amount: number = Number(
     doc
       .querySelector("#work_buy_box_wrapper [data-price]")
       ?.getAttribute("data-price") || 0,
   );
 
-  const [prefix, suffix]: string[] = fetchPriceAffix(doc);
-
-  return {
-    prefix,
-    amount,
-    suffix,
-  };
+  return amount;
 }
 
-function fetchOfficialPrice(doc: Document): Price {
+function fetchOfficialPrice(doc: Document): number {
   const amount: number = Number(
     doc
       .querySelector("#work_buy_box_wrapper [data-official_price]")
       ?.getAttribute("data-official_price") || 0,
   );
 
-  const [prefix, suffix]: string[] = fetchPriceAffix(doc);
-
-  return {
-    prefix,
-    amount,
-    suffix,
-  };
+  return amount;
 }
 
-function fetchCouponPrice(doc: Document): Price | null {
+function fetchCouponPrice(doc: Document): number | null {
   const amountElement = doc.querySelector(".coupon_available .work_price_base");
   const amount: number | null = amountElement?.textContent
     ? Number(amountElement.textContent.replace(/,/g, ""))
@@ -72,16 +63,10 @@ function fetchCouponPrice(doc: Document): Price | null {
     return null;
   }
 
-  const [prefix, suffix]: string[] = fetchPriceAffix(doc);
-
-  return {
-    prefix,
-    amount,
-    suffix,
-  };
+  return amount;
 }
 
-function fetchPriceAffix(doc: Document): string[] {
+function fetchPriceAffixes(doc: Document): string[] {
   const prefix: string =
     doc.querySelector(".work_price_prefix")?.textContent || "";
   const suffix: string =

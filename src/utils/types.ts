@@ -1,14 +1,10 @@
-export interface Price {
-  prefix: string;
-  amount: number | null;
-  suffix: string;
-}
-
 export interface WorkInfo {
   name: string;
-  price: Price;
-  official_price: Price;
-  coupon_price: Price | null;
+  price: number;
+  official_price: number;
+  coupon_price: number | null;
+  prefix: string;
+  suffix: string;
   genres: string[];
   description: string;
 }
