@@ -5,7 +5,13 @@ import { sendMessage } from "@/utils/messaging";
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
   main() {
-    const workInfo = fetchWorkInfo(document);
+    let workInfo: WorkInfo;
+    try {
+      workInfo = fetchWorkInfo(document);
+    } catch (err) {
+      console.error("Failed to fetch workInfo:", err);
+      return;
+    }
     sendMessage("sendWorkInfo", workInfo).catch((err) => {
       console.error("Failed to send workInfo:", err);
     });
