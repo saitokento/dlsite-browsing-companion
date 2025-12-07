@@ -12,3 +12,8 @@ export interface WorkInfo {
   genres: string[];
   description: string;
 }
+
+export interface WorkInfoMessage {
+  type: "WORK_INFO";
+  payload: WorkInfo;
+}

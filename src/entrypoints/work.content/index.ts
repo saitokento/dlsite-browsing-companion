@@ -1,10 +1,14 @@
 import { WorkInfo, Price } from "@/utils/types";
 import TurndownService from "turndown";
+import { sendMessage } from "@/utils/messaging";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
   main() {
-    console.log(fetchWorkInfo(document));
+    const workInfo = fetchWorkInfo(document);
+    sendMessage("sendWorkInfo", workInfo).catch((err) => {
+      console.error("Failed to send workInfo:", err);
+    });
   },
 });
 
