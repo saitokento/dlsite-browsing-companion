@@ -28,18 +28,16 @@ const turndownService = new TurndownService({
 });
 
 /**
- * Collects work metadata and a Markdown description from the provided document.
- *
- * @param doc - The page Document to extract work information from
- * @returns A WorkInfo object containing:
- *  - `name`: work title
- *  - `price`: current numeric price
- *  - `officialPrice`: listed official numeric price
- *  - `couponPrice`: coupon-adjusted numeric price or `null` if not available
- *  - `pricePrefix`: text shown before the price
- *  - `priceSuffix`: text shown after the price
- *  - `genres`: array of genre names
- *  - `description`: work description converted to Markdown
+ * @param doc - 作品ページのDocument
+ * @returns 以下を含むWorkInfoオブジェクト:
+ *  - `name`: 作品タイトル
+ *  - `price`: 割引等が適用された価格
+ *  - `officialPrice`: サークル設定価格
+ *  - `couponPrice`: クーポン価格、利用できるクーポンがない場合は`null`
+ *  - `pricePrefix`: 価格の接頭辞（例：'$'）
+ *  - `priceSuffix`: 価格の接尾時（例：'円'）
+ *  - `genres`: ジャンルの配列
+ *  - `description`: Markdown形式に変換された作品内容
  */
 function fetchWorkInfo(doc: Document): WorkInfo {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
@@ -63,9 +61,9 @@ function fetchWorkInfo(doc: Document): WorkInfo {
 }
 
 /**
- * Extracts the listed price from the page's buy box.
+ * 作品ページから価格を抽出する
  *
- * @returns The numeric listed price from the page; `0` if the price attribute is missing, or `NaN` if the attribute value is not a valid number.
+ * @returns 作品ページから取得した価格。存在しない場合は`0`を返す。
  */
 function fetchPrice(doc: Document): number {
   const amount: number = Number(
@@ -78,9 +76,9 @@ function fetchPrice(doc: Document): number {
 }
 
 /**
- * Extracts the official price from the page's buy box.
+ * 作品ページからサークル設定価格を抽出する。
  *
- * @returns The numeric value of the `data-official_price` attribute from `#work_buy_box_wrapper`, or `0` if the attribute is missing or cannot be parsed as a number.
+ * @returns 作品ページから取得したサークル設定価格。存在しない場合は`0`を返す。
  */
 function fetchOfficialPrice(doc: Document): number {
   const amount: number = Number(
@@ -93,9 +91,9 @@ function fetchOfficialPrice(doc: Document): number {
 }
 
 /**
- * Extracts the coupon price from the page when a coupon is available.
+ * クーポンが利用可能な場合、ページからクーポン価格を抽出する。
  *
- * @returns The coupon price as a number if present and parseable, `null` otherwise.
+ * @returns 作品ページから取得したクーポン価格。存在しない・解析できない場合は`null`を返す。
  */
 function fetchCouponPrice(doc: Document): number | null {
   const amountElement = doc.querySelector(".coupon_available .work_price_base");
@@ -111,9 +109,9 @@ function fetchCouponPrice(doc: Document): number | null {
 }
 
 /**
- * Extracts the price prefix and suffix strings from the document.
+ * 作品ページから価格の接頭辞と接尾辞の文字列を抽出する。
  *
- * @returns A tuple `[prefix, suffix]` where `prefix` is the text content of `.work_price_prefix` (empty string if missing) and `suffix` is the text content of `.work_price_suffix` (empty string if missing)
+ * @returns `[prefix, suffix]`のタプル。`prefix`は価格の接頭辞（例：'$'、存在しない場合は空文字列）、`suffix`は価格の接尾時（例：'円'、存在しない場合は空文字列）を返す。
  */
 function fetchPriceAffixes(doc: Document): [string, string] {
   const prefix: string =
@@ -125,10 +123,9 @@ function fetchPriceAffixes(doc: Document): [string, string] {
 }
 
 /**
- * Extracts the list of genre names from a DLsite work page.
+ * 作品ページからジャンルのリストを抽出する。
  *
- * @param doc - The document to query for genre links.
- * @returns An array of trimmed genre names in document order; empty strings are omitted.
+ * @returns ジャンルの配列。空文字列は除外される。
  */
 function fetchGenres(doc: Document): string[] {
   const genres: string[] = Array.from(
@@ -141,9 +138,9 @@ function fetchGenres(doc: Document): string[] {
 }
 
 /**
- * Convert the page's work description HTML into Markdown.
+ * 作品ページの作品内容をMarkdownに変換する。
  *
- * @returns The work description as Markdown; an empty string if no description element is found.
+ * @returns Markdown形式の作品内容。見つからない場合は空文字列を返す。
  */
 function fetchDescription(doc: Document): string {
   const descriptionHtml: string =
