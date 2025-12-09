@@ -19,13 +19,13 @@
   },
   "dependencies": {
     "@webext-core/messaging": "^2.3.0",
-    "react": "^19.1.1",
+    "react": "^19.2.1",
     "react-dom": "^19.1.1",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/cli": "^20.2.0",
+    "@commitlint/config-conventional": "^20.2.0",
     "@eslint/js": "^9.39.1",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
@@ -38,9 +38,9 @@
     "globals": "^16.5.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "3.7.3",
+    "prettier": "3.7.4",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.48.0",
+    "typescript-eslint": "^8.48.1",
     "wxt": "^0.20.6"
   },
   "lint-staged": {
