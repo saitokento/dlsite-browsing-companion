@@ -30,8 +30,8 @@ const turndownService = new TurndownService({
 function fetchWorkInfo(doc: Document): WorkInfo {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
   const price: number = fetchPrice(doc);
-  const official_price: number = fetchOfficialPrice(doc);
-  const coupon_price: number | null = fetchCouponPrice(doc);
+  const officialPrice: number = fetchOfficialPrice(doc);
+  const couponPrice: number | null = fetchCouponPrice(doc);
   const [prefix, suffix]: string[] = fetchPriceAffixes(doc);
   const genres: string[] = fetchGenres(doc);
   const description: string = fetchDescription(doc);
@@ -39,8 +39,8 @@ function fetchWorkInfo(doc: Document): WorkInfo {
   return {
     name,
     price,
-    official_price,
-    coupon_price,
+    officialPrice,
+    couponPrice,
     prefix,
     suffix,
     genres,
@@ -93,8 +93,9 @@ function fetchPriceAffixes(doc: Document): [string, string] {
 function fetchGenres(doc: Document): string[] {
   const genres: string[] = Array.from(
     doc.querySelectorAll("#work_outline .main_genre a"),
-  ).map((a) => a.textContent?.trim() || "")
-  .filter((genre) => genre !== "");
+  )
+    .map((a) => a.textContent?.trim() || "")
+    .filter((genre) => genre !== "");
 
   return genres;
 }

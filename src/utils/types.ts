@@ -1,8 +1,8 @@
 export interface WorkInfo {
   name: string;
   price: number;
-  official_price: number;
-  coupon_price: number | null;
+  officialPrice: number;
+  couponPrice: number | null;
   prefix: string;
   suffix: string;
   genres: string[];
