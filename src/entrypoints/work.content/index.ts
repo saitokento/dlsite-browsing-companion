@@ -65,7 +65,7 @@ function fetchCouponPrice(doc: Document): number | null {
     ? Number(amountElement.textContent.replace(/,/g, ""))
     : null;
 
-  if (amount == null) {
+  if (amount == null || isNaN(amount)) {
     return null;
   }
 
