@@ -1,3 +1,7 @@
+import { onMessage } from "@/utils/messaging";
+
 export default defineBackground(() => {
-  console.log("Hello background!", { id: browser.runtime.id });
+  onMessage("sendWorkInfo", (message) => {
+    console.log("Received WorkInfo:", message.data);
+  });
 });

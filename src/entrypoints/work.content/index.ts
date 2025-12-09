@@ -1,0 +1,153 @@
+import { WorkInfo } from "@/utils/types";
+import TurndownService from "turndown";
+import { sendMessage } from "@/utils/messaging";
+
+export default defineContentScript({
+  matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
+  main() {
+    let workInfo: WorkInfo;
+    try {
+      workInfo = fetchWorkInfo(document);
+    } catch (err) {
+      console.error("Failed to fetch workInfo:", err);
+      return;
+    }
+    sendMessage("sendWorkInfo", workInfo).catch((err) => {
+      console.error("Failed to send workInfo:", err);
+    });
+  },
+});
+
+const turndownService = new TurndownService({
+  headingStyle: "atx",
+  hr: "---",
+  bulletListMarker: "-",
+  codeBlockStyle: "fenced",
+  emDelimiter: "*",
+  strongDelimiter: "**",
+});
+
+/**
+ * @param doc - 作品ページのDocument
+ * @returns 以下を含むWorkInfoオブジェクト:
+ *  - `name`: 作品タイトル
+ *  - `price`: 割引等が適用された価格
+ *  - `officialPrice`: サークル設定価格
+ *  - `couponPrice`: クーポン価格、利用できるクーポンがない場合は`null`
+ *  - `pricePrefix`: 価格の接頭辞（例：'$'）
+ *  - `priceSuffix`: 価格の接尾時（例：'円'）
+ *  - `genres`: ジャンルの配列
+ *  - `description`: Markdown形式に変換された作品内容
+ */
+function fetchWorkInfo(doc: Document): WorkInfo {
+  const name: string = doc.querySelector("#work_name")?.textContent || "";
+  const price: number = fetchPrice(doc);
+  const officialPrice: number = fetchOfficialPrice(doc);
+  const couponPrice: number | null = fetchCouponPrice(doc);
+  const [pricePrefix, priceSuffix]: string[] = fetchPriceAffixes(doc);
+  const genres: string[] = fetchGenres(doc);
+  const description: string = fetchDescription(doc);
+
+  return {
+    name,
+    price,
+    officialPrice,
+    couponPrice,
+    pricePrefix,
+    priceSuffix,
+    genres,
+    description,
+  };
+}
+
+/**
+ * 作品ページから価格を抽出する
+ *
+ * @returns 作品ページから取得した価格。存在しない場合は`0`を返す。
+ */
+function fetchPrice(doc: Document): number {
+  const amount: number = Number(
+    doc
+      .querySelector("#work_buy_box_wrapper [data-price]")
+      ?.getAttribute("data-price") || 0,
+  );
+
+  return amount;
+}
+
+/**
+ * 作品ページからサークル設定価格を抽出する。
+ *
+ * @returns 作品ページから取得したサークル設定価格。存在しない場合は`0`を返す。
+ */
+function fetchOfficialPrice(doc: Document): number {
+  const amount: number = Number(
+    doc
+      .querySelector("#work_buy_box_wrapper [data-official_price]")
+      ?.getAttribute("data-official_price") || 0,
+  );
+
+  return amount;
+}
+
+/**
+ * クーポンが利用可能な場合、ページからクーポン価格を抽出する。
+ *
+ * @returns 作品ページから取得したクーポン価格。存在しない・解析できない場合は`null`を返す。
+ */
+function fetchCouponPrice(doc: Document): number | null {
+  const amountElement = doc.querySelector(".coupon_available .work_price_base");
+  const amount: number | null = amountElement?.textContent
+    ? Number(amountElement.textContent.replace(/,/g, ""))
+    : null;
+
+  if (amount == null || isNaN(amount)) {
+    return null;
+  }
+
+  return amount;
+}
+
+/**
+ * 作品ページから価格の接頭辞と接尾辞の文字列を抽出する。
+ *
+ * @returns `[prefix, suffix]`のタプル。`prefix`は価格の接頭辞（例：'$'、存在しない場合は空文字列）、`suffix`は価格の接尾時（例：'円'、存在しない場合は空文字列）を返す。
+ */
+function fetchPriceAffixes(doc: Document): [string, string] {
+  const prefix: string =
+    doc.querySelector(".work_price_prefix")?.textContent || "";
+  const suffix: string =
+    doc.querySelector(".work_price_suffix")?.textContent || "";
+
+  return [prefix, suffix];
+}
+
+/**
+ * 作品ページからジャンルのリストを抽出する。
+ *
+ * @returns ジャンルの配列。空文字列は除外される。
+ */
+function fetchGenres(doc: Document): string[] {
+  const genres: string[] = Array.from(
+    doc.querySelectorAll("#work_outline .main_genre a"),
+  )
+    .map((a) => a.textContent?.trim() || "")
+    .filter((genre) => genre !== "");
+
+  return genres;
+}
+
+/**
+ * 作品ページの作品内容をMarkdownに変換する。
+ *
+ * @returns Markdown形式の作品内容。見つからない場合は空文字列を返す。
+ */
+function fetchDescription(doc: Document): string {
+  const descriptionHtml: string =
+    doc.querySelector('[itemprop="description"].work_parts_container')
+      ?.innerHTML || "";
+
+  const description = turndownService.turndown(descriptionHtml);
+
+  return description;
+}
