@@ -18,6 +18,15 @@ export default defineContentScript({
   },
 });
 
+const turndownService = new TurndownService({
+  headingStyle: "atx",
+  hr: "---",
+  bulletListMarker: "-",
+  codeBlockStyle: "fenced",
+  emDelimiter: "*",
+  strongDelimiter: "**",
+});
+
 function fetchWorkInfo(doc: Document): WorkInfo {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
   const price: number = fetchPrice(doc);
@@ -72,7 +81,7 @@ function fetchCouponPrice(doc: Document): number | null {
   return amount;
 }
 
-function fetchPriceAffixes(doc: Document): string[] {
+function fetchPriceAffixes(doc: Document): [string, string] {
   const prefix: string =
     doc.querySelector(".work_price_prefix")?.textContent || "";
   const suffix: string =
@@ -84,7 +93,8 @@ function fetchPriceAffixes(doc: Document): string[] {
 function fetchGenres(doc: Document): string[] {
   const genres: string[] = Array.from(
     doc.querySelectorAll("#work_outline .main_genre a"),
-  ).map((a) => a.textContent?.trim() || "");
+  ).map((a) => a.textContent?.trim() || "")
+  .filter((genre) => genre !== "");
 
   return genres;
 }
@@ -93,15 +103,6 @@ function fetchDescription(doc: Document): string {
   const descriptionHtml: string =
     doc.querySelector('[itemprop="description"].work_parts_container')
       ?.innerHTML || "";
-
-  const turndownService = new TurndownService({
-    headingStyle: "atx",
-    hr: "---",
-    bulletListMarker: "-",
-    codeBlockStyle: "fenced",
-    emDelimiter: "*",
-    strongDelimiter: "**",
-  });
 
   const description = turndownService.turndown(descriptionHtml);
 
