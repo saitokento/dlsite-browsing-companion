@@ -3,8 +3,8 @@ export interface WorkInfo {
   price: number;
   officialPrice: number;
   couponPrice: number | null;
-  prefix: string;
-  suffix: string;
+  pricePrefix: string;
+  priceSuffix: string;
   genres: string[];
   description: string;
 }

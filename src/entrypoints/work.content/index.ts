@@ -32,7 +32,7 @@ function fetchWorkInfo(doc: Document): WorkInfo {
   const price: number = fetchPrice(doc);
   const officialPrice: number = fetchOfficialPrice(doc);
   const couponPrice: number | null = fetchCouponPrice(doc);
-  const [prefix, suffix]: string[] = fetchPriceAffixes(doc);
+  const [pricePrefix, priceSuffix]: string[] = fetchPriceAffixes(doc);
   const genres: string[] = fetchGenres(doc);
   const description: string = fetchDescription(doc);
 
@@ -41,8 +41,8 @@ function fetchWorkInfo(doc: Document): WorkInfo {
     price,
     officialPrice,
     couponPrice,
-    prefix,
-    suffix,
+    pricePrefix,
+    priceSuffix,
     genres,
     description,
   };
