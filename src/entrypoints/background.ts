@@ -25,6 +25,12 @@ export default defineBackground(() => {
   });
 });
 
+/**
+ * 作品に対するコメント生成用のプロンプトを構築する。
+ *
+ * @param work - プロンプトに使用するフィールドを含むWorkInfoオブジェクト
+ * @returns AIに送信するフォーマット済みの日本語プロンプト文字列
+ */
 function createCommentPrompt(work: WorkInfo): string {
   return `以下の作品情報をもとに、作品に対して短いコメントをしてください。
 出力はコメントの本文のみにしてください。
@@ -37,6 +43,12 @@ ${work.couponPrice != null ? `クーポン価格: ${work.pricePrefix}${work.coup
 ${work.description}`;
 }
 
+/**
+ * 作品情報を含むプロンプトからコメントを生成する。
+ *
+ * @param input - コメント生成に使用するプロンプト
+ * @returns 生成されたコメント
+ */
 async function generateComment(input: string): Promise<string> {
   const response = await openai.responses.create({
     model: "gpt-5-nano",
