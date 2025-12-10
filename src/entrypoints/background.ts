@@ -4,6 +4,10 @@ import { WorkInfo } from "@/utils/types";
 
 const OPENAI_API_KEY = import.meta.env.WXT_OPENAI_API_KEY as string;
 
+if (!OPENAI_API_KEY) {
+  throw new Error("WXT_OPENAI_API_KEY environment variable is not set");
+}
+
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
