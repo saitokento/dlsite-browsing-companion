@@ -26,14 +26,10 @@ export default defineBackground(() => {
 });
 
 /**
- * Builds a Japanese prompt string that asks an AI to produce a short comment for a work.
+ * 作品に対するコメント生成用のプロンプトを構築する。
  *
- * The prompt includes the work's title, displayed price (using pricePrefix/price/priceSuffix),
- * official price, an optional coupon price (when `couponPrice` is not null), comma-separated genres,
- * and the work description. It instructs the AI to output only the comment body.
- *
- * @param work - WorkInfo object containing the fields used to populate the prompt
- * @returns The formatted Japanese prompt string to be sent to the AI
+ * @param work - プロンプトに使用するフィールドを含むWorkInfoオブジェクト
+ * @returns AIに送信するフォーマット済みの日本語プロンプト文字列
  */
 function createCommentPrompt(work: WorkInfo): string {
   return `以下の作品情報をもとに、作品に対して短いコメントをしてください。
@@ -48,10 +44,10 @@ ${work.description}`;
 }
 
 /**
- * Generates a Japanese, conversational comment in a friendly tone from the given prompt.
+ * 作品情報を含むプロンプトからコメントを生成する。
  *
- * @param input - Prompt text used to produce the comment
- * @returns The AI-generated comment text
+ * @param input - コメント生成に使用するプロンプト
+ * @returns 生成されたコメント
  */
 async function generateComment(input: string): Promise<string> {
   const response = await openai.responses.create({
