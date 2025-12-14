@@ -18,7 +18,8 @@ export default defineBackground(() => {
       const workInfo: WorkInfo = message.data;
       const prompt = createCommentPrompt(workInfo);
       const comment = await generateComment(prompt);
-      console.log(comment);
+
+      await sendMessage("sendComment", comment);
     } catch (err) {
       console.error("Error generating comment:", err);
     }
