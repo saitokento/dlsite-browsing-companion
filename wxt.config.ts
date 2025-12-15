@@ -7,6 +7,10 @@ export default defineConfig({
     name: "DLsite Browsing Companion",
     description: "",
     version: "0.0.0",
+    permissions: ["sidePanel"],
+    side_panel: {
+      default_path: "entrypoints/sidepanel.html",
+    },
   },
   srcDir: "src",
 });
