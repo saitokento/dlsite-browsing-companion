@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import { onMessage } from "@/utils/messaging";
 import "./App.css";
 
-interface SendCommentMessage {
-  type: "sendComment";
-  data: string;
-}
-
 function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
