@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { onMessage } from "@/utils/messaging";
 import "./App.css";
 
 interface SendCommentMessage {
@@ -10,17 +11,9 @@ function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
   useEffect(() => {
-    const handleMessage = (message: SendCommentMessage) => {
-      if (message.type === "sendComment") {
-        setCommentHistory((prev) => [...prev, message.data]);
-      }
-    };
-
-    browser.runtime.onMessage.addListener(handleMessage);
-
-    return () => {
-      browser.runtime.onMessage.removeListener(handleMessage);
-    };
+    return onMessage("sendComment", (message) => {
+      setCommentHistory((prev) => [...prev, message.data]);
+    });
   }, []);
 
   return (
