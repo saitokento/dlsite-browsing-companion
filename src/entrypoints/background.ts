@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { onMessage } from "@/utils/messaging";
+import { onMessage, sendMessage } from "@/utils/messaging";
 import { WorkInfo } from "@/utils/types";
 
 const OPENAI_API_KEY = import.meta.env.WXT_OPENAI_API_KEY as string;
