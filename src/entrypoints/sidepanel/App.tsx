@@ -7,6 +7,14 @@ interface SendCommentMessage {
   data: string;
 }
 
+/**
+ * Renders a comment list that updates when "sendComment" messages are received.
+ *
+ * The component maintains an internal history of comments and subscribes to the
+ * "sendComment" message channel, appending incoming message data to the list.
+ *
+ * @returns A React element that displays the current comment history as a vertical list of items.
+ */
 function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
