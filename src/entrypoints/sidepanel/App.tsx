@@ -7,6 +7,14 @@ interface SendCommentMessage {
   data: string;
 }
 
+/**
+ * "sendComment"メッセージを受信したときに更新されるコメントリストをレンダリングする。
+ *
+ * このコンポーネントはコメントの履歴を内部で管理し、"sendComment"メッセージチャンネルを
+ * 購読して、受信したメッセージデータをリストに追加する。
+ *
+ * @returns 現在のコメント履歴を縦のリストとして表示するReact要素
+ */
 function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
