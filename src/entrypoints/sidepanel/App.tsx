@@ -2,11 +2,6 @@ import { useEffect, useState } from "react";
 import { onMessage } from "@/utils/messaging";
 import "./App.css";
 
-interface SendCommentMessage {
-  type: "sendComment";
-  data: string;
-}
-
 /**
  * "sendComment"メッセージを受信したときに更新されるコメントリストをレンダリングする。
  *
@@ -15,6 +10,7 @@ interface SendCommentMessage {
  *
  * @returns 現在のコメント履歴を縦のリストとして表示するReact要素
  */
+
 function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
