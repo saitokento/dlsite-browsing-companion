@@ -51,12 +51,20 @@ ${work.description}`;
  * @returns 生成されたコメント
  */
 async function generateComment(input: string): Promise<string> {
-  const response = await openai.responses.create({
-    model: "gpt-5-nano",
-    input,
-    instructions:
-      "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
-  });
+  const response = await fetch(
+    "https://dbsr1kudnk.execute-api.ap-northeast-1.amazonaws.com/Prod/comment/",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input: input,
+      }),
+    },
+  );
 
-  return response.output_text;
+  const data = await response.json();
+
+  return data.output_text;
 }
