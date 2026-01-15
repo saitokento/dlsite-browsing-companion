@@ -1,18 +1,7 @@
-import OpenAI from "openai";
 import { onMessage, sendMessage } from "@/utils/messaging";
 import { WorkInfo } from "@/utils/types";
 
-const OPENAI_API_KEY = import.meta.env.WXT_OPENAI_API_KEY as string;
-
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
-
 export default defineBackground(() => {
-  if (!OPENAI_API_KEY) {
-    throw new Error("WXT_OPENAI_API_KEY environment variable is not set");
-  }
-
   onMessage("sendWorkInfo", async (message) => {
     try {
       const workInfo: WorkInfo = message.data;
@@ -51,12 +40,30 @@ ${work.description}`;
  * @returns 生成されたコメント
  */
 async function generateComment(input: string): Promise<string> {
-  const response = await openai.responses.create({
-    model: "gpt-5-nano",
-    input,
-    instructions:
-      "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
-  });
+  const response = await fetch(
+    "https://dbsr1kudnk.execute-api.ap-northeast-1.amazonaws.com/Prod/comment",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input: input,
+      }),
+    },
+  );
 
-  return response.output_text;
+  if (!response.ok) {
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  const data = await response.json();
+
+  if (!data.output_text) {
+    throw new Error("Invalid response: output_text is missing");
+  }
+
+  return data.output_text;
 }
