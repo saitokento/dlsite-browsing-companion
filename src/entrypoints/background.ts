@@ -1,18 +1,7 @@
-import OpenAI from "openai";
 import { onMessage, sendMessage } from "@/utils/messaging";
 import { WorkInfo } from "@/utils/types";
 
-const OPENAI_API_KEY = import.meta.env.WXT_OPENAI_API_KEY as string;
-
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
-
 export default defineBackground(() => {
-  if (!OPENAI_API_KEY) {
-    throw new Error("WXT_OPENAI_API_KEY environment variable is not set");
-  }
-
   onMessage("sendWorkInfo", async (message) => {
     try {
       const workInfo: WorkInfo = message.data;
