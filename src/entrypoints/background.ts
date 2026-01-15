@@ -53,7 +53,17 @@ async function generateComment(input: string): Promise<string> {
     },
   );
 
+  if (!response.ok) {
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText}`,
+    );
+  }
+
   const data = await response.json();
+
+  if (!data.output_text) {
+    throw new Error("Invalid response: output_text is missing");
+  }
 
   return data.output_text;
 }
