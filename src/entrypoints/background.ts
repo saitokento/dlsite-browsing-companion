@@ -49,6 +49,9 @@ async function generateComment(input: string): Promise<string> {
       },
       body: JSON.stringify({
         input: input,
+        instruction:
+          "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
+        api: "xai",
       }),
     },
   );
