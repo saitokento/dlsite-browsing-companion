@@ -6,9 +6,9 @@ export default defineBackground(() => {
     try {
       const workInfo: WorkInfo = message.data;
       const prompt = createCommentPrompt(workInfo);
-      const comment = await generateComment(prompt);
+      await generateComment(prompt);
 
-      await sendMessage("sendComment", comment);
+      //await sendMessage("sendComment", comment);
     } catch (err) {
       console.error("Error generating comment:", err);
     }
@@ -39,7 +39,7 @@ ${work.description}`;
  * @param input - コメント生成に使用するプロンプト
  * @returns 生成されたコメント
  */
-async function generateComment(input: string): Promise<string> {
+async function generateComment(input: string): Promise<void> {
   const response = await fetch(
     "https://dbsr1kudnk.execute-api.ap-northeast-1.amazonaws.com/Prod/comment",
     {
@@ -62,11 +62,24 @@ async function generateComment(input: string): Promise<string> {
     );
   }
 
-  const data = await response.json();
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
 
-  if (!data.output_text) {
-    throw new Error("Invalid response: output_text is missing");
+  if (!reader) {
+    throw new Error("ReadableStream not supported");
   }
 
-  return data.output_text;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      const chunk = decoder.decode(value, { stream: true });
+      console.log(chunk);
+    }
+  } finally {
+    reader.releaseLock();
+  }
 }
