@@ -36,22 +36,22 @@ ${work.description}`;
 /**
  * 作品情報を含むプロンプトからコメントを生成する。
  *
- * @param input - コメント生成に使用するプロンプト
+ * @param request - コメント生成に使用するプロンプト
  * @returns 生成されたコメント
  */
-async function generateComment(input: string): Promise<void> {
+async function generateComment(request: string): Promise<void> {
   const response = await fetch(
-    "https://dbsr1kudnk.execute-api.ap-northeast-1.amazonaws.com/Prod/comment",
+    "https://qbqd1c1ab0.execute-api.ap-northeast-1.amazonaws.com/Prod/ask",
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        input: input,
-        instruction:
-          "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
-        api: "xai",
+        request: request,
+        // instruction:
+        //   "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
+        // api: "xai",
       }),
     },
   );
