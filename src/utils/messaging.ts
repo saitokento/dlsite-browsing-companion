@@ -3,6 +3,7 @@ import { WorkInfo } from "@/utils/types";
 
 interface ProtocolMap {
   sendWorkInfo(data: WorkInfo): void;
+  newComment(): void;
   sendComment(data: string): void;
 }
 

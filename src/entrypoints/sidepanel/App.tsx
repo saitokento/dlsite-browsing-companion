@@ -15,10 +15,28 @@ function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
   useEffect(() => {
-    return onMessage("sendComment", (message) => {
-      setCommentHistory((prev) => [...prev, message.data]);
+    const unsubscribeNew = onMessage("newComment", () => {
+      setCommentHistory((prev) => [...prev, ""]);
     });
-  }, []);
+
+    const unsubscribeSend = onMessage("sendComment", (message) => {
+      const chunk = message.data;
+      setCommentHistory((prev) => {
+        const updated = [...prev];
+        if (updated.length > 0) {
+          updated[updated.length - 1] += chunk;
+        } else {
+          updated.push(chunk);
+        }
+        return updated;
+      });
+    });
+
+    return () => {
+      unsubscribeNew();
+      unsubscribeSend();
+    };
+  });
 
   return (
     <div className="comment-list">
