@@ -1,16 +1,27 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
 import { WorkInfo } from "@/utils/types";
 
+let isGenerating = false;
+
 export default defineBackground(() => {
   onMessage("sendWorkInfo", async (message) => {
+    if (isGenerating) {
+      /* ストリーミングの重複防止 キューを実装するかは要検討 */
+      console.log("既にストリーミング処理中のためスキップ");
+      return;
+    }
+
     try {
       const workInfo: WorkInfo = message.data;
       const prompt = createCommentPrompt(workInfo);
+      isGenerating = true;
       await generateComment(prompt);
 
       //await sendMessage("sendComment", comment);
     } catch (err) {
       console.error("Error generating comment:", err);
+    } finally {
+      isGenerating = false;
     }
   });
 });
