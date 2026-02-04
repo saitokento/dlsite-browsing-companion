@@ -36,7 +36,7 @@ function App() {
       unsubscribeNew();
       unsubscribeSend();
     };
-  });
+  }, []);
 
   return (
     <div className="comment-list">
