@@ -16,7 +16,12 @@ function App() {
 
   useEffect(() => {
     const unsubscribeNew = onMessage("newComment", () => {
-      setCommentHistory((prev) => [...prev, ""]);
+      if (
+        commentHistory.length < 1 ||
+        commentHistory[commentHistory.length - 1] !== ""
+      ) {
+        setCommentHistory((prev) => [...prev, ""]);
+      }
     });
 
     const unsubscribeSend = onMessage("sendComment", (message) => {
