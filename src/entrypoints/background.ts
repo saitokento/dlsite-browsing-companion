@@ -43,10 +43,14 @@ ${work.description}`;
 }
 
 /**
- * 作品情報を含むプロンプトからコメントを生成する。
+ * 指定したプロンプトを外部APIに送信し、生成されたコメントをストリーミングで送信する。
  *
- * @param request - コメント生成に使用するプロンプト
- * @returns 生成されたコメント
+ * 外部APIへPOSTリクエストを行い、レスポンスのReadableStreamを逐次読み取りながら
+ * sendMessageで"newComment"（開始通知）と"sendComment"（受信したチャンク）を送信します。
+ *
+ * @param request - コメント生成に使用するプロンプト文字列
+ * @throws APIリクエストが失敗した場合にErrorを投げます（非OKレスポンス）
+ * @throws ReadableStreamが利用できない場合にErrorを投げます
  */
 async function generateComment(request: string): Promise<void> {
   const response = await fetch(
