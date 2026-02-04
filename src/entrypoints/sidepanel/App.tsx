@@ -16,12 +16,12 @@ function App() {
 
   useEffect(() => {
     const unsubscribeNew = onMessage("newComment", () => {
-      if (
-        commentHistory.length < 1 ||
-        commentHistory[commentHistory.length - 1] !== ""
-      ) {
-        setCommentHistory((prev) => [...prev, ""]);
-      }
+      setCommentHistory((prev) => {
+        if (prev.length < 1 || prev[prev.length - 1] !== "") {
+          return [...prev, ""];
+        }
+        return prev;
+      });
     });
 
     const unsubscribeSend = onMessage("sendComment", (message) => {
