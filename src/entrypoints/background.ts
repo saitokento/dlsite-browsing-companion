@@ -96,6 +96,10 @@ async function generateComment(request: string): Promise<void> {
       const chunk = decoder.decode(value, { stream: true });
       await sendMessage("sendComment", chunk);
     }
+    const tail = decoder.decode();
+    if (tail) {
+      await sendMessage("sendComment", tail);
+    }
   } finally {
     reader.releaseLock();
   }
