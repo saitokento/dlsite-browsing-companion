@@ -83,7 +83,7 @@ async function generateComment(request: string): Promise<void> {
     throw new Error("ReadableStream not supported");
   }
 
-  sendMessage("newComment");
+  await sendMessage("newComment");
 
   try {
     while (true) {
