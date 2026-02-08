@@ -55,7 +55,7 @@ ${work.description}`;
  */
 async function generateComment(request: string): Promise<void> {
   const response = await fetch(
-    "https://qbqd1c1ab0.execute-api.ap-northeast-1.amazonaws.com/Prod/ask",
+    "https://dyxl356a7a.execute-api.ap-northeast-1.amazonaws.com/Prod/ask",
     {
       method: "POST",
       headers: {
