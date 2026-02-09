@@ -1,6 +1,9 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
 import { WorkInfo } from "@/utils/types";
 
+const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY as string;
+const BACKEND_URL = import.meta.env.WXT_BACKEND_URL as string;
+
 let isGenerating = false;
 
 export default defineBackground(() => {
@@ -54,21 +57,19 @@ ${work.description}`;
  * @throws ReadableStreamが利用できない場合にErrorを投げる
  */
 async function generateComment(request: string): Promise<void> {
-  const response = await fetch(
-    "https://dyxl356a7a.execute-api.ap-northeast-1.amazonaws.com/Prod/ask",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        request: request,
-        // instruction:
-        //   "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
-        // api: "xai",
-      }),
+  const response = await fetch(`${BACKEND_URL}/ask`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": BACKEND_API_KEY,
     },
-  );
+    body: JSON.stringify({
+      request: request,
+      // instruction:
+      //   "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
+      // api: "xai",
+    }),
+  });
 
   if (!response.ok) {
     throw new Error(

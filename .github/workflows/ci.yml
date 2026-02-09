@@ -22,4 +22,7 @@ jobs:
       - run: npm run format:check
       - run: npm run compile
       - run: npm run build
+        env:
+          WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+          WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
       - run: npm run build:firefox
