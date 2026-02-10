@@ -27,6 +27,9 @@ jobs:
         run: |
           npm run zip
           npm run zip:firefox
+        env:
+          WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+          WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
 
       - name: Create GitHub Release and upload zips
         uses: softprops/action-gh-release@v2
