@@ -65,8 +65,8 @@ async function generateComment(request: string): Promise<void> {
     },
     body: JSON.stringify({
       request: request,
-      // instruction:
-      //   "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
+      instructions:
+        "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
       // api: "xai",
     }),
   });
