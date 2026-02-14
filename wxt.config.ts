@@ -3,6 +3,9 @@ import { defineConfig } from "wxt";
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ["@wxt-dev/module-react"],
+  webExt: {
+    startUrls: ["https://www.dlsite.com/index.html"],
+  },
   manifest: {
     name: "DLsite Browsing Companion",
     description: "",
