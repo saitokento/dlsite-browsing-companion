@@ -16,9 +16,8 @@ export default defineBackground(() => {
 
     try {
       const workInfo: WorkInfo = message.data;
-      const prompt = createCommentPrompt(workInfo);
       isGenerating = true;
-      await generateComment(prompt);
+      await generateComment(workInfo);
     } catch (err) {
       console.error("Error generating comment:", err);
     } finally {
@@ -26,24 +25,6 @@ export default defineBackground(() => {
     }
   });
 });
-
-/**
- * 作品に対するコメント生成用のプロンプトを構築する。
- *
- * @param work - プロンプトに使用するフィールドを含むWorkInfoオブジェクト
- * @returns AIに送信するフォーマット済みの日本語プロンプト文字列
- */
-function createCommentPrompt(work: WorkInfo): string {
-  return `以下の作品情報をもとに、作品に対して短いコメントをしてください。
-出力はコメントの本文のみにしてください。
-
-タイトル: ${work.name}
-価格: ${work.pricePrefix}${work.price}${work.priceSuffix}（サークル設定価格: ${work.pricePrefix}${work.officialPrice}${work.priceSuffix}）
-${work.couponPrice != null ? `クーポン価格: ${work.pricePrefix}${work.couponPrice}${work.priceSuffix}` : ""}
-ジャンル: ${work.genres.join(", ")}
-作品内容:
-${work.description}`;
-}
 
 /**
  * 指定したプロンプトを外部APIに送信し、生成されたコメントをストリーミングで送信する。
@@ -56,7 +37,7 @@ ${work.description}`;
  * @throws APIリクエストが失敗した場合にErrorを投げる（非OKレスポンス）
  * @throws ReadableStreamが利用できない場合にErrorを投げる
  */
-async function generateComment(request: string): Promise<void> {
+async function generateComment(workInfo: WorkInfo): Promise<void> {
   const response = await fetch(`${BACKEND_URL}/ask`, {
     method: "POST",
     headers: {
@@ -64,9 +45,7 @@ async function generateComment(request: string): Promise<void> {
       "x-api-key": BACKEND_API_KEY,
     },
     body: JSON.stringify({
-      request: request,
-      instructions:
-        "あなたはユーザーの友人で、ユーザーと一緒にDLsiteを見ています。",
+      workInfo: workInfo,
       // api: "xai",
     }),
   });
