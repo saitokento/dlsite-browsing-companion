@@ -8,20 +8,11 @@ let isGenerating = false;
 
 export default defineBackground(() => {
   onMessage("sendWorkInfo", async (message) => {
-    if (isGenerating) {
-      /* ストリーミングの重複防止 キューを実装するかは要検討 */
-      console.log("既にストリーミング処理中のためスキップ");
-      return;
-    }
-
     try {
       const workInfo: WorkInfo = message.data;
-      isGenerating = true;
       await generateComment(workInfo);
     } catch (err) {
       console.error("Error generating comment:", err);
-    } finally {
-      isGenerating = false;
     }
   });
 });
@@ -38,6 +29,14 @@ export default defineBackground(() => {
  * @throws ReadableStreamが利用できない場合にErrorを投げる
  */
 async function generateComment(workInfo: WorkInfo): Promise<void> {
+  if (isGenerating) {
+    /* ストリーミングの重複防止 キューを実装するかは要検討 */
+    console.log("既にストリーミング処理中のためスキップ");
+    return;
+  }
+
+  isGenerating = true;
+
   const response = await fetch(`${BACKEND_URL}/ask`, {
     method: "POST",
     headers: {
@@ -82,5 +81,6 @@ async function generateComment(workInfo: WorkInfo): Promise<void> {
     }
   } finally {
     reader.releaseLock();
+    isGenerating = false;
   }
 }
