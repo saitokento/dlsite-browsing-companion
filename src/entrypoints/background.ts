@@ -6,7 +6,9 @@ const BACKEND_URL = import.meta.env.WXT_BACKEND_URL as string;
 
 let isGenerating = false;
 
-export default defineBackground(() => {
+export default defineBackground(main);
+
+function main() {
   onMessage("work:info-extracted", async (message) => {
     try {
       const workInfo: WorkInfo = message.data;
@@ -15,7 +17,7 @@ export default defineBackground(() => {
       console.error("Error generating comment:", err);
     }
   });
-});
+}
 
 async function generateComment(workInfo: WorkInfo): Promise<void> {
   if (isGenerating) {
