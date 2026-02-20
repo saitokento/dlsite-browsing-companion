@@ -17,7 +17,7 @@ function App() {
   const [commentHistory, setCommentHistory] = useState<string[]>([]);
 
   useEffect(() => {
-    const unsubscribeNew = onMessage("newComment", () => {
+    const unsubscribeNew = onMessage("comment:stream-start", () => {
       setCommentHistory((prev) => {
         if (prev.length < 1 || prev[prev.length - 1] !== "") {
           return [...prev, ""];
@@ -26,7 +26,7 @@ function App() {
       });
     });
 
-    const unsubscribeSend = onMessage("sendComment", (message) => {
+    const unsubscribeSend = onMessage("comment:stream-chunk", (message) => {
       const chunk = message.data;
       setCommentHistory((prev) => {
         const updated = [...prev];

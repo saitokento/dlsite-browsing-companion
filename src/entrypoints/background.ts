@@ -7,7 +7,7 @@ const BACKEND_URL = import.meta.env.WXT_BACKEND_URL as string;
 let isGenerating = false;
 
 export default defineBackground(() => {
-  onMessage("sendWorkInfo", async (message) => {
+  onMessage("work:info-extracted", async (message) => {
     try {
       const workInfo: WorkInfo = message.data;
       await generateComment(workInfo);
@@ -62,7 +62,7 @@ async function generateComment(workInfo: WorkInfo): Promise<void> {
     throw new Error("ReadableStream not supported");
   }
 
-  await sendMessage("newComment");
+  await sendMessage("comment:stream-start");
 
   try {
     while (true) {
@@ -73,11 +73,11 @@ async function generateComment(workInfo: WorkInfo): Promise<void> {
       }
 
       const chunk = decoder.decode(value, { stream: true });
-      await sendMessage("sendComment", chunk);
+      await sendMessage("comment:stream-chunk", chunk);
     }
     const tail = decoder.decode();
     if (tail) {
-      await sendMessage("sendComment", tail);
+      await sendMessage("comment:stream-chunk", tail);
     }
   } finally {
     reader.releaseLock();

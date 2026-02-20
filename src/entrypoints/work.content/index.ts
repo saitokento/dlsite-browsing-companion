@@ -12,7 +12,7 @@ export default defineContentScript({
       console.error("Failed to fetch workInfo:", err);
       return;
     }
-    sendMessage("sendWorkInfo", workInfo).catch((err) => {
+    sendMessage("work:info-extracted", workInfo).catch((err) => {
       console.error("Failed to send workInfo:", err);
     });
   },
