@@ -9,14 +9,16 @@ let isGenerating = false;
 export default defineBackground(main);
 
 function main() {
-  onMessage("work:info-extracted", async (message) => {
-    try {
-      const workInfo: WorkInfo = message.data;
-      await generateComment(workInfo);
-    } catch (err) {
-      console.error("Error generating comment:", err);
-    }
-  });
+  onMessage("work:info-extracted", handleWorkInfoExtracted);
+}
+
+async function handleWorkInfoExtracted(message: { data: WorkInfo }) {
+  try {
+    const workInfo: WorkInfo = message.data;
+    await generateComment(workInfo);
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
 }
 
 async function generateComment(workInfo: WorkInfo): Promise<void> {
