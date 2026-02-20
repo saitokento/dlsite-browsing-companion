@@ -18,13 +18,13 @@ async function handleWorkInfoExtracted(message: { data: WorkInfo }) {
     const body = JSON.stringify({
       workInfo: workInfo,
     });
-    await generateComment(body);
+    await generateComment(body, "ask");
   } catch (err) {
     console.error("Error generating comment:", err);
   }
 }
 
-async function generateComment(body: string): Promise<void> {
+async function generateComment(body: string, path: string): Promise<void> {
   try {
     JSON.parse(body);
   } catch (err) {
@@ -40,7 +40,7 @@ async function generateComment(body: string): Promise<void> {
 
   isGenerating = true;
 
-  const response = await fetch(`${BACKEND_URL}/ask`, {
+  const response = await fetch(`${BACKEND_URL}/${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
