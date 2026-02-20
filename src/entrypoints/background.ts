@@ -15,13 +15,23 @@ function main() {
 async function handleWorkInfoExtracted(message: { data: WorkInfo }) {
   try {
     const workInfo: WorkInfo = message.data;
-    await generateComment(workInfo);
+    const body = JSON.stringify({
+      workInfo: workInfo,
+    });
+    await generateComment(body);
   } catch (err) {
     console.error("Error generating comment:", err);
   }
 }
 
-async function generateComment(workInfo: WorkInfo): Promise<void> {
+async function generateComment(body: string): Promise<void> {
+  try {
+    JSON.parse(body);
+  } catch (err) {
+    console.error("Error parsing body", err);
+    return;
+  }
+
   if (isGenerating) {
     /* ストリーミングの重複防止 キューを実装するかは要検討 */
     console.log("既にストリーミング処理中のためスキップ");
@@ -36,10 +46,7 @@ async function generateComment(workInfo: WorkInfo): Promise<void> {
       "Content-Type": "application/json",
       "x-api-key": BACKEND_API_KEY,
     },
-    body: JSON.stringify({
-      workInfo: workInfo,
-      // api: "xai",
-    }),
+    body: body,
   });
 
   if (!response.ok) {
