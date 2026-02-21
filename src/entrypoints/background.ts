@@ -4,7 +4,7 @@ import { WorkInfo } from "@/utils/types";
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY as string;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL as string;
 
-let isGenerating = false;
+let isStreaming = false;
 
 export default defineBackground(main);
 
@@ -32,13 +32,13 @@ async function generateComment(body: string, path: string): Promise<void> {
     return;
   }
 
-  if (isGenerating) {
+  if (isStreaming) {
     /* ストリーミングの重複防止 キューを実装するかは要検討 */
     console.log("既にストリーミング処理中のためスキップ");
     return;
   }
 
-  isGenerating = true;
+  isStreaming = true;
 
   const response = await fetch(`${BACKEND_URL}/${path}`, {
     method: "POST",
@@ -81,6 +81,6 @@ async function generateComment(body: string, path: string): Promise<void> {
     }
   } finally {
     reader.releaseLock();
-    isGenerating = false;
+    isStreaming = false;
   }
 }
