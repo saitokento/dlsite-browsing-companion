@@ -12,10 +12,10 @@ function main() {
   onMessage("work:extracted", handleWorkExtracted);
 }
 
-async function handleWorkExtracted(message: { data: Work }) {
+async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   try {
     const work: Work = message.data;
-    const body = JSON.stringify({
+    const body: string = JSON.stringify({
       work: work,
     });
     await generateComment(body, "ask");
