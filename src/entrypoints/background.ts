@@ -1,5 +1,5 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { Work } from "@/utils/types";
+import { Work, Path } from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -31,7 +31,7 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   }
 }
 
-async function generateComment(body: string, path: string): Promise<void> {
+async function generateComment(body: string, path: Path): Promise<void> {
   try {
     JSON.parse(body);
   } catch (err) {
