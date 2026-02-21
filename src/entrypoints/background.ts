@@ -20,11 +20,11 @@ function main(): void {
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
+  const work: Work = message.data;
+  const body: string = JSON.stringify({
+    work: work,
+  });
   try {
-    const work: Work = message.data;
-    const body: string = JSON.stringify({
-      work: work,
-    });
     await generateComment(body, "ask");
   } catch (err) {
     console.error("Error generating comment:", err);
