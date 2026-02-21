@@ -35,7 +35,7 @@ async function generateComment(body: string, path: Path): Promise<void> {
   try {
     JSON.parse(body);
   } catch (err) {
-    console.error("Error parsing body", err);
+    console.error("body is not valid JSON:", err);
     return;
   }
 
