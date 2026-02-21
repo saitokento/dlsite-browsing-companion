@@ -1,5 +1,5 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { WorkInfo } from "@/utils/types";
+import { Work } from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY as string;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL as string;
@@ -9,14 +9,14 @@ let isStreaming = false;
 export default defineBackground(main);
 
 function main() {
-  onMessage("work:info-extracted", handleWorkInfoExtracted);
+  onMessage("work:extracted", handleWorkExtracted);
 }
 
-async function handleWorkInfoExtracted(message: { data: WorkInfo }) {
+async function handleWorkExtracted(message: { data: Work }) {
   try {
-    const workInfo: WorkInfo = message.data;
+    const work: Work = message.data;
     const body = JSON.stringify({
-      workInfo: workInfo,
+      work: work,
     });
     await generateComment(body, "ask");
   } catch (err) {

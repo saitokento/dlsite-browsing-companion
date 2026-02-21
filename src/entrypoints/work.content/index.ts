@@ -1,19 +1,19 @@
-import { WorkInfo } from "@/utils/types";
+import { Work } from "@/utils/types";
 import TurndownService from "turndown";
 import { sendMessage } from "@/utils/messaging";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
   main() {
-    let workInfo: WorkInfo;
+    let work: Work;
     try {
-      workInfo = fetchWorkInfo(document);
+      work = fetchWork(document);
     } catch (err) {
-      console.error("Failed to fetch workInfo:", err);
+      console.error("Failed to fetch work:", err);
       return;
     }
-    sendMessage("work:info-extracted", workInfo).catch((err) => {
-      console.error("Failed to send workInfo:", err);
+    sendMessage("work:extracted", work).catch((err) => {
+      console.error("Failed to send work:", err);
     });
   },
 });
@@ -27,7 +27,7 @@ const turndownService = new TurndownService({
   strongDelimiter: "**",
 });
 
-function fetchWorkInfo(doc: Document): WorkInfo {
+function fetchWork(doc: Document): Work {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
   const price: number = fetchPrice(doc);
   const officialPrice: number = fetchOfficialPrice(doc);

@@ -1,4 +1,4 @@
-export interface WorkInfo {
+export interface Work {
   name: string;
   price: number;
   officialPrice: number;

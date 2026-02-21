@@ -1,8 +1,8 @@
 import { defineExtensionMessaging } from "@webext-core/messaging";
-import { WorkInfo } from "@/utils/types";
+import { Work } from "@/utils/types";
 
 interface ProtocolMap {
-  "work:info-extracted": (data: WorkInfo) => void;
+  "work:extracted": (data: Work) => void;
   "comment:stream-start": () => void;
   "comment:stream-chunk": (data: string) => void;
 }
