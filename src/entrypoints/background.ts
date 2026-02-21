@@ -41,7 +41,7 @@ async function generateComment(body: string, path: Path): Promise<void> {
 
   if (isStreaming) {
     /* ストリーミングの重複防止 キューを実装するかは要検討 */
-    console.log("既にストリーミング処理中のためスキップ");
+    console.log("Streaming already in progress; skipping new request.");
     return;
   }
 
