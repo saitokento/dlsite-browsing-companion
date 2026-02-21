@@ -15,7 +15,7 @@ let isStreaming = false;
 
 export default defineBackground(main);
 
-function main() {
+function main(): void {
   onMessage("work:extracted", handleWorkExtracted);
 }
 
