@@ -5,10 +5,10 @@ const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 
 if (typeof BACKEND_API_KEY !== "string" || BACKEND_API_KEY.length === 0) {
-  throw new Error("Missing required environment variable: WXT_BACKEND_API_KEY");
+  throw new Error("Missing required environment variable: BACKEND_API_KEY");
 }
 if (typeof BACKEND_URL !== "string" || BACKEND_URL.length === 0) {
-  throw new Error("Missing required environment variable: WXT_BACKEND_URL");
+  throw new Error("Missing required environment variable: BACKEND_URL");
 }
 
 let isStreaming = false;
