@@ -10,9 +10,9 @@ export default defineContentScript({
 function main(): void {
   let work: Work;
   try {
-    work = fetchWork(document);
+    work = extractWork(document);
   } catch (err) {
-    console.error("Failed to fetch work:", err);
+    console.error("Failed to extract work:", err);
     return;
   }
   sendMessage("work:extracted", work).catch((err) => {
@@ -20,14 +20,14 @@ function main(): void {
   });
 }
 
-function fetchWork(doc: Document): Work {
+function extractWork(doc: Document): Work {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
-  const price: number = fetchPrice(doc);
-  const officialPrice: number = fetchOfficialPrice(doc);
-  const couponPrice: number | null = fetchCouponPrice(doc);
-  const [pricePrefix, priceSuffix]: string[] = fetchPriceAffixes(doc);
-  const genres: string[] = fetchGenres(doc);
-  const description: string = fetchDescription(doc);
+  const price: number = extractPrice(doc);
+  const officialPrice: number = extractOfficialPrice(doc);
+  const couponPrice: number | null = extractCouponPrice(doc);
+  const [pricePrefix, priceSuffix]: string[] = extractPriceAffixes(doc);
+  const genres: string[] = extractGenres(doc);
+  const description: string = extractDescription(doc);
 
   return {
     name,
@@ -41,7 +41,7 @@ function fetchWork(doc: Document): Work {
   };
 }
 
-function fetchPrice(doc: Document): number {
+function extractPrice(doc: Document): number {
   const amount: number = Number(
     doc
       .querySelector("#work_buy_box_wrapper [data-price]")
@@ -51,7 +51,7 @@ function fetchPrice(doc: Document): number {
   return amount;
 }
 
-function fetchOfficialPrice(doc: Document): number {
+function extractOfficialPrice(doc: Document): number {
   const amount: number = Number(
     doc
       .querySelector("#work_buy_box_wrapper [data-official_price]")
@@ -61,7 +61,7 @@ function fetchOfficialPrice(doc: Document): number {
   return amount;
 }
 
-function fetchCouponPrice(doc: Document): number | null {
+function extractCouponPrice(doc: Document): number | null {
   const amountElement = doc.querySelector(".coupon_available .work_price_base");
   const amount: number | null = amountElement?.textContent
     ? Number(amountElement.textContent.replace(/,/g, ""))
@@ -74,7 +74,7 @@ function fetchCouponPrice(doc: Document): number | null {
   return amount;
 }
 
-function fetchPriceAffixes(doc: Document): [string, string] {
+function extractPriceAffixes(doc: Document): [string, string] {
   const prefix: string =
     doc.querySelector(".work_price_prefix")?.textContent || "";
   const suffix: string =
@@ -83,7 +83,7 @@ function fetchPriceAffixes(doc: Document): [string, string] {
   return [prefix, suffix];
 }
 
-function fetchGenres(doc: Document): string[] {
+function extractGenres(doc: Document): string[] {
   const genres: string[] = Array.from(
     doc.querySelectorAll("#work_outline .main_genre a"),
   )
@@ -93,7 +93,7 @@ function fetchGenres(doc: Document): string[] {
   return genres;
 }
 
-function fetchDescription(doc: Document): string {
+function extractDescription(doc: Document): string {
   const descriptionHtml: string =
     doc.querySelector('[itemprop="description"].work_parts_container')
       ?.innerHTML || "";
