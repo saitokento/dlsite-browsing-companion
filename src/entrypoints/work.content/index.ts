@@ -43,38 +43,38 @@ function extractWork(doc: Document): Work {
 }
 
 function extractPrice(doc: Document): number {
-  const amount: number = Number(
+  const price: number = Number(
     doc
       .querySelector("#work_buy_box_wrapper div[hidden][data-price]")
       ?.getAttribute("data-price") || 0,
   );
 
-  return amount;
+  return price;
 }
 
 function extractOfficialPrice(doc: Document): number {
-  const amount: number = Number(
+  const price: number = Number(
     doc
       .querySelector("#work_buy_box_wrapper div[hidden][data-official_price]")
       ?.getAttribute("data-official_price") || 0,
   );
 
-  return amount;
+  return price;
 }
 
 function extractCouponPrice(doc: Document): number | null {
-  const amountElement = doc.querySelector(
+  const priceElement = doc.querySelector(
     "#work_buy_box_wrapper .coupon_available dl.coupon_detail dd.total.type_jpy .work_price_base",
   );
-  const amount: number | null = amountElement?.textContent
-    ? Number(amountElement.textContent.replace(/,/g, ""))
+  const price: number | null = priceElement?.textContent
+    ? Number(priceElement.textContent.replace(/,/g, ""))
     : null;
 
-  if (amount == null || isNaN(amount)) {
+  if (price == null || isNaN(price)) {
     return null;
   }
 
-  return amount;
+  return price;
 }
 
 function extractPriceCurrency(doc: Document): string {
