@@ -4,19 +4,21 @@ import { sendMessage } from "@/utils/messaging";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
-  main() {
-    let work: Work;
-    try {
-      work = fetchWork(document);
-    } catch (err) {
-      console.error("Failed to fetch work:", err);
-      return;
-    }
-    sendMessage("work:extracted", work).catch((err) => {
-      console.error("Failed to send work:", err);
-    });
-  },
+  main,
 });
+
+function main(): void {
+  let work: Work;
+  try {
+    work = fetchWork(document);
+  } catch (err) {
+    console.error("Failed to fetch work:", err);
+    return;
+  }
+  sendMessage("work:extracted", work).catch((err) => {
+    console.error("Failed to send work:", err);
+  });
+}
 
 const turndownService = new TurndownService({
   headingStyle: "atx",
