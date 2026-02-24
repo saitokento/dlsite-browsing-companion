@@ -6,7 +6,7 @@ function App() {
   const [commentList, setCommentList] = useState<string[]>([]);
 
   useEffect(() => {
-    const unsubscribeNew = onMessage("comment:stream-start", () => {
+    const removeStreamStartListener = onMessage("comment:stream-start", () => {
       setCommentList((prev) => {
         if (prev.length < 1 || prev[prev.length - 1] !== "") {
           return [...prev, ""];
@@ -15,22 +15,25 @@ function App() {
       });
     });
 
-    const unsubscribeSend = onMessage("comment:stream-chunk", (message) => {
-      const chunk = message.data;
-      setCommentList((prev) => {
-        const updated = [...prev];
-        if (updated.length > 0) {
-          updated[updated.length - 1] += chunk;
-        } else {
-          updated.push(chunk);
-        }
-        return updated;
-      });
-    });
+    const removeStreamChunkListener = onMessage(
+      "comment:stream-chunk",
+      (message) => {
+        const chunk = message.data;
+        setCommentList((prev) => {
+          const updated = [...prev];
+          if (updated.length > 0) {
+            updated[updated.length - 1] += chunk;
+          } else {
+            updated.push(chunk);
+          }
+          return updated;
+        });
+      },
+    );
 
     return () => {
-      unsubscribeNew();
-      unsubscribeSend();
+      removeStreamStartListener();
+      removeStreamChunkListener();
     };
   }, []);
 
