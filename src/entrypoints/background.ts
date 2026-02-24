@@ -47,47 +47,51 @@ async function generateComment(body: string, path: Path): Promise<void> {
 
   isStreaming = true;
 
-  const response = await fetch(`${BACKEND_URL}/${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": BACKEND_API_KEY,
-    },
-    body: body,
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `API request failed: ${response.status} ${response.statusText}`,
-    );
-  }
-
-  const reader = response.body?.getReader();
-  const decoder = new TextDecoder();
-
-  if (!reader) {
-    throw new Error("ReadableStream not supported");
-  }
-
-  await sendMessage("comment:stream-start");
-
   try {
-    while (true) {
-      const { done, value } = await reader.read();
+    const response = await fetch(`${BACKEND_URL}/${path}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": BACKEND_API_KEY,
+      },
+      body: body,
+    });
 
-      if (done) {
-        break;
+    if (!response.ok) {
+      throw new Error(
+        `API request failed: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+
+    if (!reader) {
+      throw new Error("ReadableStream not supported");
+    }
+
+    await sendMessage("comment:stream-start");
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        const chunk = decoder.decode(value, { stream: true });
+        await sendMessage("comment:stream-chunk", chunk);
       }
-
-      const chunk = decoder.decode(value, { stream: true });
-      await sendMessage("comment:stream-chunk", chunk);
+      const tail = decoder.decode();
+      if (tail) {
+        await sendMessage("comment:stream-chunk", tail);
+      }
+    } finally {
+      reader.releaseLock();
+      isStreaming = false;
     }
-    const tail = decoder.decode();
-    if (tail) {
-      await sendMessage("comment:stream-chunk", tail);
-    }
-  } finally {
-    reader.releaseLock();
-    isStreaming = false;
+  } catch (err) {
+    console.error(err);
   }
 }
