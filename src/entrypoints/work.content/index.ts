@@ -20,15 +20,6 @@ function main(): void {
   });
 }
 
-const turndownService = new TurndownService({
-  headingStyle: "atx",
-  hr: "---",
-  bulletListMarker: "-",
-  codeBlockStyle: "fenced",
-  emDelimiter: "*",
-  strongDelimiter: "**",
-});
-
 function fetchWork(doc: Document): Work {
   const name: string = doc.querySelector("#work_name")?.textContent || "";
   const price: number = fetchPrice(doc);
@@ -111,3 +102,12 @@ function fetchDescription(doc: Document): string {
 
   return description;
 }
+
+const turndownService = new TurndownService({
+  headingStyle: "atx",
+  hr: "---",
+  bulletListMarker: "-",
+  codeBlockStyle: "fenced",
+  emDelimiter: "*",
+  strongDelimiter: "**",
+});
