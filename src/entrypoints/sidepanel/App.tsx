@@ -3,11 +3,11 @@ import { onMessage } from "@/utils/messaging";
 import "./App.css";
 
 function App() {
-  const [commentHistory, setCommentHistory] = useState<string[]>([]);
+  const [commentList, setCommentList] = useState<string[]>([]);
 
   useEffect(() => {
     const unsubscribeNew = onMessage("comment:stream-start", () => {
-      setCommentHistory((prev) => {
+      setCommentList((prev) => {
         if (prev.length < 1 || prev[prev.length - 1] !== "") {
           return [...prev, ""];
         }
@@ -17,7 +17,7 @@ function App() {
 
     const unsubscribeSend = onMessage("comment:stream-chunk", (message) => {
       const chunk = message.data;
-      setCommentHistory((prev) => {
+      setCommentList((prev) => {
         const updated = [...prev];
         if (updated.length > 0) {
           updated[updated.length - 1] += chunk;
@@ -36,7 +36,7 @@ function App() {
 
   return (
     <div className="comment-list">
-      {commentHistory.map((item, index) => (
+      {commentList.map((item, index) => (
         <div key={index} className="comment-item">
           <p className="comment-text">{item}</p>
         </div>
