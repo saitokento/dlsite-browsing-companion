@@ -21,11 +21,13 @@ function App() {
         const chunk = message.data;
         setCommentList((prev) => {
           const updated = [...prev];
-          if (updated.length > 0) {
-            updated[updated.length - 1] += chunk;
-          } else {
+          if (updated.length === 0) {
+            console.warn(
+              "'comment:stream-chunk' received before 'comment:stream-start'.",
+            );
             updated.push(chunk);
           }
+          updated[updated.length - 1] += chunk;
           return updated;
         });
       },
