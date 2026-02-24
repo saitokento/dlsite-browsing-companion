@@ -16,7 +16,7 @@ function main(): void {
     return;
   }
   sendMessage("work:extracted", work).catch((err) => {
-    console.error("Failed to send work:", err);
+    console.error("Failed to send 'work:extracted':", err);
   });
 }
 
