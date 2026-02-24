@@ -21,7 +21,9 @@ function main(): void {
 }
 
 function extractWork(doc: Document): Work {
-  const name: string = doc.querySelector("#work_name")?.textContent || "";
+  const name: string =
+    doc.querySelector("#work_buy_box_wrapper div[hidden][data-work_name]")
+      ?.textContent || "";
   const price: number = extractPrice(doc);
   const officialPrice: number = extractOfficialPrice(doc);
   const couponPrice: number | null = extractCouponPrice(doc);
@@ -44,7 +46,7 @@ function extractWork(doc: Document): Work {
 function extractPrice(doc: Document): number {
   const amount: number = Number(
     doc
-      .querySelector("#work_buy_box_wrapper [data-price]")
+      .querySelector("#work_buy_box_wrapper div[hidden][data-price]")
       ?.getAttribute("data-price") || 0,
   );
 
@@ -54,7 +56,7 @@ function extractPrice(doc: Document): number {
 function extractOfficialPrice(doc: Document): number {
   const amount: number = Number(
     doc
-      .querySelector("#work_buy_box_wrapper [data-official_price]")
+      .querySelector("#work_buy_box_wrapper div[hidden][data-official_price]")
       ?.getAttribute("data-official_price") || 0,
   );
 
@@ -62,7 +64,9 @@ function extractOfficialPrice(doc: Document): number {
 }
 
 function extractCouponPrice(doc: Document): number | null {
-  const amountElement = doc.querySelector(".coupon_available .work_price_base");
+  const amountElement = doc.querySelector(
+    "#work_buy_box_wrapper .coupon_available dl.coupon_detail dd.total.type_jpy .work_price_base",
+  );
   const amount: number | null = amountElement?.textContent
     ? Number(amountElement.textContent.replace(/,/g, ""))
     : null;
@@ -95,7 +99,7 @@ function extractGenres(doc: Document): string[] {
 
 function extractDescription(doc: Document): string {
   const descriptionHtml: string =
-    doc.querySelector('[itemprop="description"].work_parts_container')
+    doc.querySelector('div[itemprop="description"].work_parts_container')
       ?.innerHTML || "";
 
   const description = turndownService.turndown(descriptionHtml);
