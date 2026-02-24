@@ -59,7 +59,7 @@ async function generateComment(body: string, path: Path): Promise<void> {
 
     if (!response.ok) {
       throw new Error(
-        `API request failed: ${response.status} ${response.statusText}`,
+        `Response status: ${response.status} ${response.statusText}`,
       );
     }
 
