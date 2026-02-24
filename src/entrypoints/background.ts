@@ -63,35 +63,26 @@ async function generateComment(body: string, path: Path): Promise<void> {
       );
     }
 
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-
-    if (!reader) {
-      throw new Error("ReadableStream not supported");
+    if (response.body === null) {
+      throw new Error(
+        `Response body is null: ${response.status} ${response.statusText}`,
+      );
     }
+
+    const stream = response.body.pipeThrough(new TextDecoderStream());
 
     await sendMessage("comment:stream-start");
 
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-          break;
-        }
-
-        const chunk = decoder.decode(value, { stream: true });
-        await sendMessage("comment:stream-chunk", chunk);
-      }
-      const tail = decoder.decode();
-      if (tail) {
-        await sendMessage("comment:stream-chunk", tail);
-      }
-    } finally {
-      reader.releaseLock();
-      isStreaming = false;
+    for await (const chunk of stream) {
+      await sendMessage("comment:stream-chunk", chunk);
     }
   } catch (err) {
-    console.error(err);
+    if (err instanceof Error) {
+      console.error(err.message);
+    } else {
+      console.error(String(err));
+    }
+  } finally {
+    isStreaming = false;
   }
 }
