@@ -21,9 +21,7 @@ function main(): void {
 }
 
 function extractWork(doc: Document): Work {
-  const name: string =
-    doc.querySelector("#work_buy_box_wrapper div[hidden][data-work_name]")
-      ?.textContent || "";
+  const name: string = extractName(doc);
   const price: number = extractPrice(doc);
   const officialPrice: number = extractOfficialPrice(doc);
   const couponPrice: number | null = extractCouponPrice(doc);
@@ -40,6 +38,14 @@ function extractWork(doc: Document): Work {
     genres,
     description,
   };
+}
+
+function extractName(doc: Document): string {
+  const name: string =
+    doc.querySelector("#work_buy_box_wrapper div[hidden][data-work_name]")
+      ?.textContent || "";
+
+  return name;
 }
 
 function extractPrice(doc: Document): number {
