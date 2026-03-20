@@ -7,29 +7,13 @@ function App() {
 
   useEffect(() => {
     const removeStreamStartListener = onMessage("comment:stream-start", () => {
-      setCommentList((prev) => {
-        if (prev.length < 1 || prev[prev.length - 1] !== "") {
-          return [...prev, ""];
-        }
-        return prev;
-      });
+      setCommentList(startNewComment);
     });
 
     const removeStreamChunkListener = onMessage(
       "comment:stream-chunk",
       (message) => {
-        const chunk = message.data;
-        setCommentList((prev) => {
-          const updated = [...prev];
-          if (updated.length === 0) {
-            console.warn(
-              "'comment:stream-chunk' received before 'comment:stream-start'.",
-            );
-            updated.push(chunk);
-          }
-          updated[updated.length - 1] += chunk;
-          return updated;
-        });
+        setCommentList((prev) => appendChunkToLastComment(prev, message.data));
       },
     );
 
@@ -48,6 +32,25 @@ function App() {
       ))}
     </div>
   );
+}
+
+function startNewComment(prev: string[]): string[] {
+  if (prev.length < 1 || prev[prev.length - 1] !== "") {
+    return [...prev, ""];
+  }
+  return prev;
+}
+
+function appendChunkToLastComment(prev: string[], chunk: string): string[] {
+  const updated = [...prev];
+  if (updated.length === 0) {
+    console.warn(
+      "'comment:stream-chunk' received before 'comment:stream-start'.",
+    );
+    updated.push(chunk);
+  }
+  updated[updated.length - 1] += chunk;
+  return updated;
 }
 
 export default App;
