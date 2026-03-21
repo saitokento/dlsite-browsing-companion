@@ -25,7 +25,7 @@ function extractWork(doc: Document): Work {
   const price: number = extractPrice(doc);
   const officialPrice: number = extractOfficialPrice(doc);
   const couponPrice: number | null = extractCouponPrice(doc);
-  const priceCurrency: string = extractPriceCurrency(doc);
+  const [pricePrefix, priceSuffix]: string[] = extractPriceAffixes(doc);
   const genres: string[] = extractGenres(doc);
   const description: string = extractDescription(doc);
 
@@ -34,7 +34,8 @@ function extractWork(doc: Document): Work {
     price,
     officialPrice,
     couponPrice,
-    priceCurrency,
+    pricePrefix,
+    priceSuffix,
     genres,
     description,
   };
@@ -83,13 +84,13 @@ function extractCouponPrice(doc: Document): number | null {
   return price;
 }
 
-function extractPriceCurrency(doc: Document): string {
-  const priceCurrency: string =
-    doc
-      .querySelector("div[itemprop='offers'] meta[itemprop='priceCurrency'")
-      ?.getAttribute("content") || "";
+function extractPriceAffixes(doc: Document): [string, string] {
+  const prefix: string =
+    doc.querySelector(".work_price_prefix")?.textContent || "";
+  const suffix: string =
+    doc.querySelector(".work_price_suffix")?.textContent || "";
 
-  return priceCurrency;
+  return [prefix, suffix];
 }
 
 function extractGenres(doc: Document): string[] {

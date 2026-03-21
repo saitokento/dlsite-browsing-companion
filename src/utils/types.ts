@@ -3,7 +3,8 @@ export interface Work {
   price: number;
   officialPrice: number;
   couponPrice: number | null;
-  priceCurrency: string;
+  pricePrefix: string;
+  priceSuffix: string;
   genres: string[];
   description: string;
 }
