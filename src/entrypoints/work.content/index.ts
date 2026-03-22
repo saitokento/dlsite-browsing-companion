@@ -43,8 +43,9 @@ function extractWork(doc: Document): Work {
 
 function extractName(doc: Document): string {
   const name: string =
-    doc.querySelector("#work_buy_box_wrapper div[hidden][data-work_name]")
-      ?.textContent || "";
+    doc
+      .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-work_name]")
+      ?.getAttribute("data-work_name") ?? "";
 
   return name;
 }
@@ -52,7 +53,7 @@ function extractName(doc: Document): string {
 function extractPrice(doc: Document): number {
   const price: number = Number(
     doc
-      .querySelector("#work_buy_box_wrapper div[hidden][data-price]")
+      .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-price]")
       ?.getAttribute("data-price") || 0,
   );
 
@@ -62,7 +63,9 @@ function extractPrice(doc: Document): number {
 function extractOfficialPrice(doc: Document): number {
   const price: number = Number(
     doc
-      .querySelector("#work_buy_box_wrapper div[hidden][data-official_price]")
+      .querySelector<HTMLElement>(
+        "#work_buy_box_wrapper > [data-official_price]",
+      )
       ?.getAttribute("data-official_price") || 0,
   );
 
@@ -70,34 +73,41 @@ function extractOfficialPrice(doc: Document): number {
 }
 
 function extractCouponPrice(doc: Document): number | null {
-  const priceElement = doc.querySelector(
-    "#work_buy_box_wrapper .coupon_available dl.coupon_detail dd.total.type_jpy .work_price_base",
-  );
-  const price: number | null = priceElement?.textContent
-    ? Number(priceElement.textContent.replace(/,/g, ""))
-    : null;
+  const priceElement = doc
+    .querySelector<HTMLElement>(
+      "#work_price .coupon_available .total .work_price_base",
+    )
+    ?.textContent?.replace(/,/g, "")
+    .trim();
 
-  if (price == null || isNaN(price)) {
-    return null;
-  }
+  if (!priceElement) return null;
 
-  return price;
+  const price = Number(priceElement);
+  return Number.isNaN(price) ? null : price;
 }
 
 function extractPriceAffixes(doc: Document): [string, string] {
   const prefix: string =
-    doc.querySelector(".work_price_prefix")?.textContent || "";
+    doc
+      .querySelector<HTMLElement>(
+        "#work_price .work_buy_body .price .work_price_prefix",
+      )
+      ?.textContent.trim() ?? "";
   const suffix: string =
-    doc.querySelector(".work_price_suffix")?.textContent || "";
+    doc
+      .querySelector<HTMLElement>(
+        "#work_price .work_buy_body .price .work_price_suffix",
+      )
+      ?.textContent.trim() ?? "";
 
   return [prefix, suffix];
 }
 
 function extractGenres(doc: Document): string[] {
   const genres: string[] = Array.from(
-    doc.querySelectorAll("#work_outline .main_genre a"),
+    doc.querySelectorAll<HTMLElement>("#work_outline .main_genre a"),
   )
-    .map((a) => a.textContent?.trim() || "")
+    .map((a) => a.textContent?.trim() ?? "")
     .filter((genre) => genre !== "");
 
   return genres;
@@ -105,8 +115,9 @@ function extractGenres(doc: Document): string[] {
 
 function extractDescription(doc: Document): string {
   const descriptionHtml: string =
-    doc.querySelector('div[itemprop="description"].work_parts_container')
-      ?.innerHTML || "";
+    doc.querySelector<HTMLElement>(
+      'div[itemprop="description"].work_parts_container',
+    )?.innerHTML ?? "";
 
   const description = turndownService.turndown(descriptionHtml);
 
