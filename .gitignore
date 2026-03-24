@@ -29,3 +29,5 @@ web-ext.config.ts
 .env.production
 
 copilot-instructions.md
+
+WXT-README.md
