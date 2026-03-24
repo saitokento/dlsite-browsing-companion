@@ -26,3 +26,6 @@ jobs:
           WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
           WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
       - run: npm run build:firefox
+        env:
+          WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+          WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
