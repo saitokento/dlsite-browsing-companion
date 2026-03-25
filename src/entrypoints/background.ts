@@ -1,5 +1,5 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { Work, Path } from "@/utils/types";
+import { Work } from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -25,13 +25,13 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
     work: work,
   });
   try {
-    await generateComment(body, "ask");
+    await generateComment(body);
   } catch (err) {
     console.error("Error generating comment:", err);
   }
 }
 
-async function generateComment(body: string, path: Path): Promise<void> {
+async function generateComment(body: string): Promise<void> {
   try {
     JSON.parse(body);
   } catch (err) {
@@ -48,7 +48,7 @@ async function generateComment(body: string, path: Path): Promise<void> {
   isStreaming = true;
 
   try {
-    const response = await fetch(`${BACKEND_URL}/${path}`, {
+    const response = await fetch(BACKEND_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

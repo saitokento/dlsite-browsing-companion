@@ -8,5 +8,3 @@ export interface Work {
   genres: string[];
   description: string;
 }
-
-export type Path = "ask";
