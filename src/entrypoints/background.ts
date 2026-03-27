@@ -1,5 +1,5 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { Work } from "@/utils/types";
+import { Work, Usecase } from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -21,23 +21,31 @@ function main(): void {
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   const work: Work = message.data;
-  const body: string = JSON.stringify({
+  const payload: string = JSON.stringify({
     work: work,
   });
   try {
-    await generateComment(body);
+    await generateComment("work", payload);
   } catch (err) {
     console.error("Error generating comment:", err);
   }
 }
 
-async function generateComment(body: string): Promise<void> {
+async function generateComment(
+  usecase: Usecase,
+  payload: string,
+): Promise<void> {
   try {
-    JSON.parse(body);
+    JSON.parse(payload);
   } catch (err) {
-    console.error("body is not valid JSON:", err);
+    console.error("payload is not valid JSON:", err);
     return;
   }
+
+  const body: string = JSON.stringify({
+    usecase: usecase,
+    payload: payload,
+  });
 
   if (isStreaming) {
     /* ストリーミングの重複防止 キューを実装するかは要検討 */
