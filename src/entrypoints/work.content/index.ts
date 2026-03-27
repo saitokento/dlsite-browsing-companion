@@ -22,9 +22,9 @@ function main(): void {
 
 function extractWork(doc: Document): Work {
   const name: string = extractName(doc);
-  const price: number = extractPrice(doc);
-  const officialPrice: number = extractOfficialPrice(doc);
-  const couponPrice: number | null = extractCouponPrice(doc);
+  const price: string = extractPrice(doc);
+  const officialPrice: string = extractOfficialPrice(doc);
+  const couponPrice: string | null = extractCouponPrice(doc);
   const [pricePrefix, priceSuffix]: string[] = extractPriceAffixes(doc);
   const genres: string[] = extractGenres(doc);
   const description: string = extractDescription(doc);
@@ -50,29 +50,27 @@ function extractName(doc: Document): string {
   return name;
 }
 
-function extractPrice(doc: Document): number {
-  const price: number = Number(
+function extractPrice(doc: Document): string {
+  const price: string =
     doc
       .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-price]")
-      ?.getAttribute("data-price") || 0,
-  );
+      ?.getAttribute("data-price") || "0";
 
   return price;
 }
 
-function extractOfficialPrice(doc: Document): number {
-  const price: number = Number(
+function extractOfficialPrice(doc: Document): string {
+  const price: string =
     doc
       .querySelector<HTMLElement>(
         "#work_buy_box_wrapper > [data-official_price]",
       )
-      ?.getAttribute("data-official_price") || 0,
-  );
+      ?.getAttribute("data-official_price") || "0";
 
   return price;
 }
 
-function extractCouponPrice(doc: Document): number | null {
+function extractCouponPrice(doc: Document): string | null {
   const priceElement = doc
     .querySelector<HTMLElement>(
       "#work_price .coupon_available .total .work_price_base",
@@ -82,8 +80,7 @@ function extractCouponPrice(doc: Document): number | null {
 
   if (!priceElement) return null;
 
-  const price = Number(priceElement);
-  return Number.isNaN(price) ? null : price;
+  return priceElement;
 }
 
 function extractPriceAffixes(doc: Document): [string, string] {
