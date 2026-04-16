@@ -47,7 +47,7 @@ function appendChunkToLastComment(prev: string[], chunk: string): string[] {
     console.warn(
       "'comment:stream-chunk' received before 'comment:stream-start'.",
     );
-    updated.push(chunk);
+    updated.push("");
   }
   updated[updated.length - 1] += chunk;
   return updated;
