@@ -9,4 +9,12 @@ export interface Work {
   description: string;
 }
 
-export type Usecase = "work";
+export type WorkPayload = {
+  work: Work;
+};
+
+export type PayloadByUsecase = {
+  work: WorkPayload;
+};
+
+export type Usecase = keyof PayloadByUsecase;

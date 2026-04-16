@@ -1,5 +1,5 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { Work, Usecase } from "@/utils/types";
+import { Work, PayloadByUsecase, Usecase } from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -21,30 +21,20 @@ function main(): void {
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   const work: Work = message.data;
-  const payload: string = JSON.stringify({
-    work: work,
-  });
   try {
-    await generateComment("work", payload);
+    await generateComment("work", { work });
   } catch (err) {
     console.error("Error generating comment:", err);
   }
 }
 
-async function generateComment(
-  usecase: Usecase,
-  payload: string,
+async function generateComment<U extends Usecase>(
+  usecase: U,
+  payload: PayloadByUsecase[U],
 ): Promise<void> {
-  try {
-    JSON.parse(payload);
-  } catch (err) {
-    console.error("payload is not valid JSON:", err);
-    return;
-  }
-
-  const body: string = JSON.stringify({
-    usecase: usecase,
-    payload: payload,
+  const body = JSON.stringify({
+    usecase,
+    payload,
   });
 
   if (isStreaming) {
@@ -62,7 +52,7 @@ async function generateComment(
         "Content-Type": "application/json",
         "x-api-key": BACKEND_API_KEY,
       },
-      body: body,
+      body,
     });
 
     if (!response.ok) {
