@@ -89,13 +89,13 @@ function extractPriceAffixes(doc: Document): [string, string] {
       .querySelector<HTMLElement>(
         "#work_price .work_buy_body .price .work_price_prefix",
       )
-      ?.textContent.trim() ?? "";
+      ?.textContent?.trim() ?? "";
   const suffix: string =
     doc
       .querySelector<HTMLElement>(
         "#work_price .work_buy_body .price .work_price_suffix",
       )
-      ?.textContent.trim() ?? "";
+      ?.textContent?.trim() ?? "";
 
   return [prefix, suffix];
 }
