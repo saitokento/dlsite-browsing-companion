@@ -11,6 +11,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+      WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
 
     steps:
       - uses: actions/checkout@v6
@@ -26,10 +29,4 @@ jobs:
       - run: pnpm format:check
       - run: pnpm compile
       - run: pnpm build
-        env:
-          WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
-          WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
       - run: pnpm build:firefox
-        env:
-          WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
-          WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
