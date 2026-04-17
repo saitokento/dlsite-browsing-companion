@@ -1,52 +1,33 @@
-import { WorkInfo } from "@/utils/types";
+import { Work } from "@/utils/types";
 import TurndownService from "turndown";
 import { sendMessage } from "@/utils/messaging";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
-  main() {
-    let workInfo: WorkInfo;
-    try {
-      workInfo = fetchWorkInfo(document);
-    } catch (err) {
-      console.error("Failed to fetch workInfo:", err);
-      return;
-    }
-    sendMessage("sendWorkInfo", workInfo).catch((err) => {
-      console.error("Failed to send workInfo:", err);
-    });
-  },
+  main,
 });
 
-const turndownService = new TurndownService({
-  headingStyle: "atx",
-  hr: "---",
-  bulletListMarker: "-",
-  codeBlockStyle: "fenced",
-  emDelimiter: "*",
-  strongDelimiter: "**",
-});
+function main(): void {
+  let work: Work;
+  try {
+    work = extractWork(document);
+  } catch (err) {
+    console.error("Failed to extract work:", err);
+    return;
+  }
+  sendMessage("work:extracted", work).catch((err) => {
+    console.error("Failed to send 'work:extracted':", err);
+  });
+}
 
-/**
- * @param doc - 作品ページのDocument
- * @returns 以下を含むWorkInfoオブジェクト:
- *  - `name`: 作品タイトル
- *  - `price`: 割引等が適用された価格
- *  - `officialPrice`: サークル設定価格
- *  - `couponPrice`: クーポン価格、利用できるクーポンがない場合は`null`
- *  - `pricePrefix`: 価格の接頭辞（例：'$'）
- *  - `priceSuffix`: 価格の接尾時（例：'円'）
- *  - `genres`: ジャンルの配列
- *  - `description`: Markdown形式に変換された作品内容
- */
-function fetchWorkInfo(doc: Document): WorkInfo {
-  const name: string = doc.querySelector("#work_name")?.textContent || "";
-  const price: number = fetchPrice(doc);
-  const officialPrice: number = fetchOfficialPrice(doc);
-  const couponPrice: number | null = fetchCouponPrice(doc);
-  const [pricePrefix, priceSuffix]: string[] = fetchPriceAffixes(doc);
-  const genres: string[] = fetchGenres(doc);
-  const description: string = fetchDescription(doc);
+function extractWork(doc: Document): Work {
+  const name: string = extractName(doc);
+  const price: string = extractPrice(doc);
+  const officialPrice: string = extractOfficialPrice(doc);
+  const couponPrice: string | null = extractCouponPrice(doc);
+  const [pricePrefix, priceSuffix]: string[] = extractPriceAffixes(doc);
+  const genres: string[] = extractGenres(doc);
+  const description: string = extractDescription(doc);
 
   return {
     name,
@@ -60,94 +41,91 @@ function fetchWorkInfo(doc: Document): WorkInfo {
   };
 }
 
-/**
- * 作品ページから価格を抽出する
- *
- * @returns 作品ページから取得した価格。存在しない場合は`0`を返す。
- */
-function fetchPrice(doc: Document): number {
-  const amount: number = Number(
+function extractName(doc: Document): string {
+  const name: string =
     doc
-      .querySelector("#work_buy_box_wrapper [data-price]")
-      ?.getAttribute("data-price") || 0,
-  );
+      .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-work_name]")
+      ?.getAttribute("data-work_name") ?? "";
 
-  return amount;
+  return name;
 }
 
-/**
- * 作品ページからサークル設定価格を抽出する。
- *
- * @returns 作品ページから取得したサークル設定価格。存在しない場合は`0`を返す。
- */
-function fetchOfficialPrice(doc: Document): number {
-  const amount: number = Number(
+function extractPrice(doc: Document): string {
+  const price: string =
     doc
-      .querySelector("#work_buy_box_wrapper [data-official_price]")
-      ?.getAttribute("data-official_price") || 0,
-  );
+      .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-price]")
+      ?.getAttribute("data-price") || "0";
 
-  return amount;
+  return price;
 }
 
-/**
- * クーポンが利用可能な場合、ページからクーポン価格を抽出する。
- *
- * @returns 作品ページから取得したクーポン価格。存在しない・解析できない場合は`null`を返す。
- */
-function fetchCouponPrice(doc: Document): number | null {
-  const amountElement = doc.querySelector(".coupon_available .work_price_base");
-  const amount: number | null = amountElement?.textContent
-    ? Number(amountElement.textContent.replace(/,/g, ""))
-    : null;
+function extractOfficialPrice(doc: Document): string {
+  const price: string =
+    doc
+      .querySelector<HTMLElement>(
+        "#work_buy_box_wrapper > [data-official_price]",
+      )
+      ?.getAttribute("data-official_price") || "0";
 
-  if (amount == null || isNaN(amount)) {
-    return null;
-  }
-
-  return amount;
+  return price;
 }
 
-/**
- * 作品ページから価格の接頭辞と接尾辞の文字列を抽出する。
- *
- * @returns `[prefix, suffix]`のタプル。`prefix`は価格の接頭辞（例：'$'、存在しない場合は空文字列）、`suffix`は価格の接尾時（例：'円'、存在しない場合は空文字列）を返す。
- */
-function fetchPriceAffixes(doc: Document): [string, string] {
+function extractCouponPrice(doc: Document): string | null {
+  const priceElement = doc
+    .querySelector<HTMLElement>(
+      "#work_price .coupon_available .total .work_price_base",
+    )
+    ?.textContent?.replace(/,/g, "")
+    .trim();
+
+  if (!priceElement) return null;
+
+  return priceElement;
+}
+
+function extractPriceAffixes(doc: Document): [string, string] {
   const prefix: string =
-    doc.querySelector(".work_price_prefix")?.textContent || "";
+    doc
+      .querySelector<HTMLElement>(
+        "#work_price .work_buy_body .price .work_price_prefix",
+      )
+      ?.textContent?.trim() ?? "";
   const suffix: string =
-    doc.querySelector(".work_price_suffix")?.textContent || "";
+    doc
+      .querySelector<HTMLElement>(
+        "#work_price .work_buy_body .price .work_price_suffix",
+      )
+      ?.textContent?.trim() ?? "";
 
   return [prefix, suffix];
 }
 
-/**
- * 作品ページからジャンルのリストを抽出する。
- *
- * @returns ジャンルの配列。空文字列は除外される。
- */
-function fetchGenres(doc: Document): string[] {
+function extractGenres(doc: Document): string[] {
   const genres: string[] = Array.from(
-    doc.querySelectorAll("#work_outline .main_genre a"),
+    doc.querySelectorAll<HTMLElement>("#work_outline .main_genre a"),
   )
-    .map((a) => a.textContent?.trim() || "")
+    .map((a) => a.textContent?.trim() ?? "")
     .filter((genre) => genre !== "");
 
   return genres;
 }
 
-/**
- * 作品ページの作品内容をMarkdownに変換する。
- *
- * @returns Markdown形式の作品内容。見つからない場合は空文字列を返す。
- */
-function fetchDescription(doc: Document): string {
+function extractDescription(doc: Document): string {
   const descriptionHtml: string =
-    doc.querySelector('[itemprop="description"].work_parts_container')
-      ?.innerHTML || "";
+    doc.querySelector<HTMLElement>(
+      'div[itemprop="description"].work_parts_container',
+    )?.innerHTML ?? "";
 
   const description = turndownService.turndown(descriptionHtml);
 
   return description;
 }
+
+const turndownService = new TurndownService({
+  headingStyle: "atx",
+  hr: "---",
+  bulletListMarker: "-",
+  codeBlockStyle: "fenced",
+  emDelimiter: "*",
+  strongDelimiter: "**",
+});

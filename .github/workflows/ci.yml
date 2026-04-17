@@ -2,27 +2,31 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
+      WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
 
     steps:
       - uses: actions/checkout@v6
-      - name: Setup Node.js
+      - uses: pnpm/action-setup@v4
+      - name: Use Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: "npm"
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
-      - run: npm run compile
-      - run: npm run build
-        env:
-          WXT_BACKEND_API_KEY: ${{ secrets.BACKEND_API_KEY }}
-          WXT_BACKEND_URL: ${{ secrets.BACKEND_URL }}
-      - run: npm run build:firefox
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
+      - run: pnpm compile
+      - run: pnpm build
+      - run: pnpm build:firefox

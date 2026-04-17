@@ -25,6 +25,9 @@ web-ext.config.ts
 *.sln
 *.sw?
 
-.env.local
+.env.development
+.env.production
 
 copilot-instructions.md
+
+WXT-README.md
