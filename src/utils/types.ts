@@ -18,3 +18,5 @@ export type PayloadByUsecase = {
 };
 
 export type Usecase = keyof PayloadByUsecase;
+
+export type CharacterId = "default";
