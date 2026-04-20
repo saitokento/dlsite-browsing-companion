@@ -20,6 +20,7 @@ function main(): void {
 
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:hello", handleHomeHello);
+  onMessage("circle:new", handleCircleSummary);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
@@ -31,13 +32,11 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   }
 }
 
-async function handleHomeHello(): Promise<void> {
-  try {
-    await generateComment("home:hello", {});
-  } catch (err) {
-    console.error("Error generating comment:", err);
-  }
+async function handleCircleSummary(): Promise<void> {
+  console.log("circle");
 }
+
+async function handleHomeHello(): Promise<void> {}
 
 async function generateComment<U extends Usecase>(
   usecase: U,
