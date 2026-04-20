@@ -3,12 +3,12 @@ import "./App.css";
 function App() {
   return (
     <>
-      <button onClick={OpenDLsite}>DLsiteを開く</button>
+      <button onClick={openDLsite}>DLsiteを開く</button>
     </>
   );
 }
 
-async function OpenDLsite() {
+async function openDLsite() {
   const sidePanelPromise = browser.windows
     .getCurrent()
     .then((win) =>
