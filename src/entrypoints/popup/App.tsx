@@ -1,35 +1,47 @@
-import { useState } from "react";
-import reactLogo from "@/assets/react.svg";
-import wxtLogo from "/wxt.svg";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
-      <div>
-        <a href="https://wxt.dev" target="_blank" rel="noreferrer">
-          <img src={wxtLogo} className="logo" alt="WXT logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>WXT + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the WXT and React logos to learn more
-      </p>
+      <button onClick={openDLsite}>DLsiteを開く</button>
     </>
   );
+}
+
+async function openDLsite() {
+  const sidePanelPromise = browser.windows
+    .getCurrent()
+    .then((win) =>
+      win.id !== undefined
+        ? browser.sidePanel.open({ windowId: win.id })
+        : undefined,
+    )
+    .catch(console.error);
+
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
+
+  const dlsiteUrl = "https://www.dlsite.com/home/";
+
+  if (
+    activeTab?.id &&
+    (activeTab.url === "chrome://newtab/" || activeTab.url === "about:newtab")
+  ) {
+    await browser.tabs.update(activeTab.id, {
+      url: dlsiteUrl,
+      active: true,
+    });
+  } else {
+    const win = await browser.windows.getCurrent();
+    await browser.tabs.create({
+      windowId: win.id,
+      url: dlsiteUrl,
+      active: true,
+    });
+  }
+  await sidePanelPromise;
 }
 
 export default App;

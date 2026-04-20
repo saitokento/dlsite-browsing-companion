@@ -4,14 +4,14 @@ import { defineConfig } from "wxt";
 export default defineConfig({
   modules: ["@wxt-dev/module-react"],
   webExt: {
-    startUrls: ["https://www.dlsite.com/index.html"],
+    startUrls: ["chrome://newtab/"],
   },
   manifest: {
     name: "DLsite Browsing Companion",
     description: "",
     permissions: ["sidePanel"],
     side_panel: {
-      default_path: "entrypoints/sidepanel.html",
+      default_path: "sidepanel.html",
     },
   },
   srcDir: "src",
