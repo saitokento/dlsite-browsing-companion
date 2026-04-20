@@ -1,11 +1,5 @@
 import "./App.css";
 
-let currentWindowId: number | undefined;
-
-browser.windows.getCurrent().then((win) => {
-  currentWindowId = win.id;
-});
-
 function App() {
   return (
     <>
@@ -15,9 +9,14 @@ function App() {
 }
 
 async function OpenDLsite() {
-  if (!currentWindowId) return;
-
-  browser.sidePanel.open({ windowId: currentWindowId }).catch(console.error);
+  const sidePanelPromise = browser.windows
+    .getCurrent()
+    .then((win) =>
+      win.id !== undefined
+        ? browser.sidePanel.open({ windowId: win.id })
+        : undefined,
+    )
+    .catch(console.error);
 
   const [activeTab] = await browser.tabs.query({
     active: true,
@@ -35,12 +34,14 @@ async function OpenDLsite() {
       active: true,
     });
   } else {
+    const win = await browser.windows.getCurrent();
     await browser.tabs.create({
-      windowId: currentWindowId,
+      windowId: win.id,
       url: dlsiteUrl,
       active: true,
     });
   }
+  await sidePanelPromise;
 }
 
 export default App;
