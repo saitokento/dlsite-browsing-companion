@@ -19,12 +19,21 @@ function main(): void {
   }
 
   onMessage("work:extracted", handleWorkExtracted);
+  onMessage("home:hello", handleHomeHello);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   const work: Work = message.data;
   try {
     await generateComment("work", { work });
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function handleHomeHello(): Promise<void> {
+  try {
+    await generateComment("home:hello", {});
   } catch (err) {
     console.error("Error generating comment:", err);
   }
@@ -37,7 +46,7 @@ async function generateComment<U extends Usecase>(
   const body = JSON.stringify({
     characterId,
     usecase,
-    payload,
+    payload: payload,
   });
 
   if (isStreaming) {

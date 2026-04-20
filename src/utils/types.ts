@@ -13,8 +13,11 @@ export type WorkPayload = {
   work: Work;
 };
 
+type EmptyPayload = Record<string, never>;
+
 export type PayloadByUsecase = {
   work: WorkPayload;
+  "home:hello": EmptyPayload;
 };
 
 export type Usecase = keyof PayloadByUsecase;
