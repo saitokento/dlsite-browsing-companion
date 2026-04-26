@@ -20,7 +20,7 @@ function main(): void {
 
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:hello", handleHomeHello);
-  onMessage("circle:new", handleCircleSummary);
+  onMessage("circle:new", handleCircleNew);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
@@ -32,11 +32,22 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   }
 }
 
-async function handleCircleSummary(): Promise<void> {
-  console.log("circle");
+async function handleCircleNew(message: { data: CircleWork[] }): Promise<void> {
+  const circleWorkList: CircleWork[] = message.data;
+  try {
+    await generateComment("circle:new", { circleWorkList });
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
 }
 
-async function handleHomeHello(): Promise<void> {}
+async function handleHomeHello(): Promise<void> {
+  try {
+    await generateComment("home:hello", {});
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
 
 async function generateComment<U extends Usecase>(
   usecase: U,

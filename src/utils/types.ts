@@ -9,8 +9,24 @@ export interface Work {
   description: string;
 }
 
+export interface CircleWork {
+  productId: string;
+  category: string;
+  name: string;
+  author: string | null;
+  price: string;
+  officialPrice: string;
+  pricePrefix: string;
+  priceSuffix: string;
+  label: string | null;
+}
+
 export type WorkPayload = {
   work: Work;
+};
+
+export type CircleNewPayload = {
+  circleWorkList: CircleWork[];
 };
 
 type EmptyPayload = Record<string, never>;
@@ -18,6 +34,7 @@ type EmptyPayload = Record<string, never>;
 export type PayloadByUsecase = {
   work: WorkPayload;
   "home:hello": EmptyPayload;
+  "circle:new": CircleNewPayload;
 };
 
 export type Usecase = keyof PayloadByUsecase;

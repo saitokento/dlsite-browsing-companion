@@ -4,7 +4,7 @@ import { Work } from "@/utils/types";
 interface ProtocolMap {
   "work:extracted": (data: Work) => void;
   "home:hello": () => void;
-  "circle:new": () => void;
+  "circle:new": (data: CircleWork[]) => void;
   "comment:stream-start": () => void;
   "comment:stream-chunk": (data: string) => void;
 }
