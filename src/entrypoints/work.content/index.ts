@@ -84,20 +84,22 @@ function extractCouponPrice(doc: Document): string | null {
 }
 
 function extractPriceAffixes(doc: Document): [string, string] {
-  const prefix: string =
-    doc
-      .querySelector<HTMLElement>(
-        "#work_price .work_buy_body .price .work_price_prefix",
-      )
-      ?.textContent?.trim() ?? "";
-  const suffix: string =
-    doc
-      .querySelector<HTMLElement>(
-        "#work_price .work_buy_body .price .work_price_suffix",
-      )
-      ?.textContent?.trim() ?? "";
+  // const prefix: string =
+  //   doc
+  //     .querySelector<HTMLElement>(
+  //       "#work_price .work_buy_body .price .work_price_prefix",
+  //     )
+  //     ?.textContent?.trim() ?? "";
+  // const suffix: string =
+  //   doc
+  //     .querySelector<HTMLElement>(
+  //       "#work_price .work_buy_body .price .work_price_suffix",
+  //     )
+  //     ?.textContent?.trim() ?? "";
 
-  return [prefix, suffix];
+  // return [prefix, suffix];
+
+  return ["", "円"];
 }
 
 function extractGenres(doc: Document): string[] {
