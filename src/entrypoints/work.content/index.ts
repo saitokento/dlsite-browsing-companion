@@ -54,7 +54,7 @@ function extractPrice(doc: Document): string {
   const price: string =
     doc
       .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-price]")
-      ?.getAttribute("data-price") || "0";
+      ?.getAttribute("data-price") || "";
 
   return price;
 }
@@ -65,7 +65,7 @@ function extractOfficialPrice(doc: Document): string {
       .querySelector<HTMLElement>(
         "#work_buy_box_wrapper > [data-official_price]",
       )
-      ?.getAttribute("data-official_price") || "0";
+      ?.getAttribute("data-official_price") || "";
 
   return price;
 }
