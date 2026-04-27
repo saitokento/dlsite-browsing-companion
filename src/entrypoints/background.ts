@@ -1,5 +1,5 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { Work, PayloadByUsecase, Usecase } from "@/utils/types";
+import { Work, PayloadByUsecase, Usecase, UserbuyWork } from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -21,12 +21,21 @@ function main(): void {
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
+  onMessage("userbuy:page1", handleUserbuyPage1);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   const work: Work = message.data;
   try {
     await generateComment("work", { work });
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function handleHomeHello(): Promise<void> {
+  try {
+    await generateComment("home:hello", {});
   } catch (err) {
     console.error("Error generating comment:", err);
   }
@@ -41,9 +50,12 @@ async function handleCircleNew(message: { data: CircleWork[] }): Promise<void> {
   }
 }
 
-async function handleHomeHello(): Promise<void> {
+async function handleUserbuyPage1(message: {
+  data: UserbuyWork[];
+}): Promise<void> {
+  const userbuyWorkList: UserbuyWork[] = message.data;
   try {
-    await generateComment("home:hello", {});
+    await generateComment("userbuy:page1", { userbuyWorkList });
   } catch (err) {
     console.error("Error generating comment:", err);
   }

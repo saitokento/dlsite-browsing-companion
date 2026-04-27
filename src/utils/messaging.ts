@@ -1,10 +1,11 @@
 import { defineExtensionMessaging } from "@webext-core/messaging";
-import { Work } from "@/utils/types";
+import { UserbuyWork, Work } from "@/utils/types";
 
 interface ProtocolMap {
   "work:extracted": (data: Work) => void;
   "home:hello": () => void;
   "circle:new": (data: CircleWork[]) => void;
+  "userbuy:page1": (data: UserbuyWork[]) => void;
   "comment:stream-start": () => void;
   "comment:stream-chunk": (data: string) => void;
 }
