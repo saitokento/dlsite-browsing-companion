@@ -32,6 +32,14 @@ export interface UserbuyWork {
   priceSuffix: string;
 }
 
+export interface CartWork {
+  productId: string;
+  name: string;
+  makerName: string;
+  price: string;
+  officialPrice: string;
+}
+
 export type WorkPayload = {
   work: Work;
 };
@@ -44,6 +52,16 @@ export type UserbuyPage1Payload = {
   userbuyWorkList: UserbuyWork[];
 };
 
+export type CartListPayload = {
+  cartWorkList: CartWork[];
+  totalDiscount: string;
+  totalOriginal: string | null;
+  couponName: string | null;
+  totalCoupon: string | null;
+  pricePrefix: string;
+  priceSuffix: string;
+};
+
 type EmptyPayload = Record<string, never>;
 
 export type PayloadByUsecase = {
@@ -51,6 +69,7 @@ export type PayloadByUsecase = {
   "home:hello": EmptyPayload;
   "circle:new": CircleNewPayload;
   "userbuy:page1": UserbuyPage1Payload;
+  "cart:list": CartListPayload;
 };
 
 export type Usecase = keyof PayloadByUsecase;

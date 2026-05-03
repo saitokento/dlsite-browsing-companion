@@ -1,5 +1,11 @@
 import { onMessage, sendMessage } from "@/utils/messaging";
-import { Work, PayloadByUsecase, Usecase, UserbuyWork } from "@/utils/types";
+import {
+  Work,
+  PayloadByUsecase,
+  Usecase,
+  UserbuyWork,
+  CartListPayload,
+} from "@/utils/types";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -22,6 +28,7 @@ function main(): void {
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
   onMessage("userbuy:page1", handleUserbuyPage1);
+  onMessage("cart:list", handleCartList);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
@@ -56,6 +63,17 @@ async function handleUserbuyPage1(message: {
   const userbuyWorkList: UserbuyWork[] = message.data;
   try {
     await generateComment("userbuy:page1", { userbuyWorkList });
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function handleCartList(message: {
+  data: CartListPayload;
+}): Promise<void> {
+  const cartListPayload: CartListPayload = message.data;
+  try {
+    await generateComment("cart:list", cartListPayload);
   } catch (err) {
     console.error("Error generating comment:", err);
   }
