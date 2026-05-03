@@ -52,12 +52,15 @@ function extractWorkList(doc: Document): CartWork[] {
       "";
     const makerName =
       item.querySelector(".work_content .maker_name a")?.textContent ?? "";
+    const category =
+      item.querySelector(".work_thumb .work_category")?.textContent ?? "";
     const price = item.getAttribute("data-price") ?? "";
     const officialPrice = item.getAttribute("data-official_price") ?? "";
     return {
       productId,
       name,
       makerName,
+      category,
       price,
       officialPrice,
     };

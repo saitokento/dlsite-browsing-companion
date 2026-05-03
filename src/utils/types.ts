@@ -36,6 +36,7 @@ export interface CartWork {
   productId: string;
   name: string;
   makerName: string;
+  category: string;
   price: string;
   officialPrice: string;
 }
