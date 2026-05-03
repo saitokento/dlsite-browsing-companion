@@ -41,6 +41,13 @@ export interface CartWork {
   officialPrice: string;
 }
 
+export interface DownloadWork {
+  productId: string;
+  name: string;
+  makerName: string;
+  genre: string;
+}
+
 export type WorkPayload = {
   work: Work;
 };
@@ -63,6 +70,10 @@ export type CartListPayload = {
   priceSuffix: string;
 };
 
+export type DownloadListPayload = {
+  downloadWorkList: DownloadWork[];
+};
+
 type EmptyPayload = Record<string, never>;
 
 export type PayloadByUsecase = {
@@ -71,6 +82,7 @@ export type PayloadByUsecase = {
   "circle:new": CircleNewPayload;
   "userbuy:page1": UserbuyPage1Payload;
   "cart:list": CartListPayload;
+  "download:list": DownloadListPayload;
 };
 
 export type Usecase = keyof PayloadByUsecase;

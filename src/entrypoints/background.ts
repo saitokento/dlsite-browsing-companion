@@ -29,6 +29,7 @@ function main(): void {
   onMessage("circle:new", handleCircleNew);
   onMessage("userbuy:page1", handleUserbuyPage1);
   onMessage("cart:list", handleCartList);
+  onMessage("download:list", handleDownloadList);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
@@ -74,6 +75,17 @@ async function handleCartList(message: {
   const cartListPayload: CartListPayload = message.data;
   try {
     await generateComment("cart:list", cartListPayload);
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function handleDownloadList(message: {
+  data: DownloadListPayload;
+}): Promise<void> {
+  const downloadListPayload: DownloadListPayload = message.data;
+  try {
+    await generateComment("download:list", downloadListPayload);
   } catch (err) {
     console.error("Error generating comment:", err);
   }
