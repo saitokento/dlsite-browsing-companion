@@ -62,7 +62,7 @@ function extractGenres(item: HTMLElement): string[] {
 
 function extractPriceText(item: HTMLElement): string[] {
   const priceText =
-    Array.from(item.querySelector("td.work_price")!.childNodes ?? [])
+    Array.from(item.querySelector("td.work_price")?.childNodes ?? [])
       .find((node) => node.nodeType === Node.TEXT_NODE)
       ?.textContent?.trim()
       .replace(/,/g, "") ?? "";
