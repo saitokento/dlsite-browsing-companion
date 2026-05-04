@@ -58,7 +58,7 @@ function extractAnnounceAuthor(item: HTMLElement): string | null {
   const authorElement = item.querySelector<HTMLElement>(".author");
 
   return authorElement
-    ? `${authorElement?.textContent}${authorElement.classList.contains("omit") ? " 他" : ""}`
+    ? `${authorElement?.textContent ?? ""}${authorElement.classList.contains("omit") ? " 他" : ""}`
     : null;
 }
 
@@ -110,7 +110,7 @@ function extractWorkList(doc: Document): CircleWork[] {
 function extractAuthor(item: HTMLElement): string | null {
   const authorElement = item.querySelector(".author");
   return authorElement
-    ? `${authorElement?.textContent}${authorElement.classList.contains("omit") ? " 他" : ""}`
+    ? `${authorElement?.textContent ?? ""}${authorElement.classList.contains("omit") ? " 他" : ""}`
     : null;
 }
 
