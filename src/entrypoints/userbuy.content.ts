@@ -70,8 +70,8 @@ function extractPriceText(item: HTMLElement): string[] {
   const priceMatch = priceText.match(/^([^\d]*)(\d+)([^\d]*)$/);
 
   const price = priceMatch?.[2]?.trim() ?? "";
-  const pricePrefix = priceMatch?.[1]?.trim() ?? "";
-  const priceSuffix = priceMatch?.[3]?.trim() ?? "";
+  // const pricePrefix = priceMatch?.[1]?.trim() ?? "";
+  // const priceSuffix = priceMatch?.[3]?.trim() ?? "";
 
   return [price, "", "円"];
 }
