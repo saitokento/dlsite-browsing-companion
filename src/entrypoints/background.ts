@@ -49,10 +49,12 @@ async function handleHomeHello(): Promise<void> {
   }
 }
 
-async function handleCircleNew(message: { data: CircleWork[] }): Promise<void> {
-  const circleWorkList: CircleWork[] = message.data;
+async function handleCircleNew(message: {
+  data: CircleNewPayload;
+}): Promise<void> {
+  const circleNewPayload: CircleNewPayload = message.data;
   try {
-    await generateComment("circle:new", { circleWorkList });
+    await generateComment("circle:new", circleNewPayload);
   } catch (err) {
     console.error("Error generating comment:", err);
   }

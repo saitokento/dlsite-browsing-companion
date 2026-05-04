@@ -6,16 +6,24 @@ export default defineContentScript({
 });
 
 function main(): void {
-  let circleWorkList: CircleWork[];
+  let circleNewPayload: CircleNewPayload;
   try {
-    circleWorkList = extractWorkList(document);
+    circleNewPayload = extractCircle(document);
   } catch (err) {
-    console.error("Failed to extract work list:", err);
+    console.error("Failed to extract circle page:", err);
     return;
   }
-  sendMessage("circle:new", circleWorkList).catch((err) => {
+  sendMessage("circle:new", circleNewPayload).catch((err) => {
     console.error("Failed to send 'circle:new':", err);
   });
+}
+
+function extractCircle(doc: Document): CircleNewPayload {
+  const makerName =
+    doc.querySelector<HTMLElement>(".prof_maker_name")?.textContent ?? "";
+  const circleWorkList = extractWorkList(doc);
+
+  return { makerName, circleWorkList };
 }
 
 function extractWorkList(doc: Document): CircleWork[] {

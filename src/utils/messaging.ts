@@ -4,12 +4,13 @@ import {
   Work,
   CartListPayload,
   DownloadListPayload,
+  CircleNewPayload,
 } from "@/utils/types";
 
 interface ProtocolMap {
   "work:extracted": (data: Work) => void;
   "home:hello": () => void;
-  "circle:new": (data: CircleWork[]) => void;
+  "circle:new": (data: CircleNewPayload) => void;
   "userbuy:page1": (data: UserbuyWork[]) => void;
   "cart:list": (data: CartListPayload) => void;
   "download:list": (data: DownloadListPayload) => void;

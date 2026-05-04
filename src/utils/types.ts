@@ -53,6 +53,7 @@ export type WorkPayload = {
 };
 
 export type CircleNewPayload = {
+  makerName: string;
   circleWorkList: CircleWork[];
 };
 
