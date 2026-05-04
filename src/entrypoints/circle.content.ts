@@ -1,5 +1,3 @@
-import { CircleWork, CircleAnnounceWork } from "@/utils/types";
-
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/circle/profile/=/maker_id/*.html"],
   main,

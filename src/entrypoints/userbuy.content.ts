@@ -1,5 +1,3 @@
-import { UserbuyWork } from "@/utils/types";
-
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/mypage/userbuy/=/type/*/start/all*"],
   main,

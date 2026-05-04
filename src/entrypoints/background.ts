@@ -1,12 +1,3 @@
-import { onMessage, sendMessage } from "@/utils/messaging";
-import {
-  Work,
-  PayloadByUsecase,
-  Usecase,
-  UserbuyWork,
-  CartListPayload,
-} from "@/utils/types";
-
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 

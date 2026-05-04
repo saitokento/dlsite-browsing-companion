@@ -1,5 +1,3 @@
-import { CartWork, CartListPayload } from "@/utils/types";
-
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/cart"],
   main,

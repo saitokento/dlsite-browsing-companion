@@ -1,5 +1,3 @@
-import { DownloadWork } from "@/utils/types";
-
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/download*"],
   main,
