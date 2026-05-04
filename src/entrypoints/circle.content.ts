@@ -1,4 +1,4 @@
-import { CircleWork } from "@/utils/types";
+import { CircleWork, CircleAnnounceWork } from "@/utils/types";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/circle/profile/=/maker_id/*.html"],
@@ -21,9 +21,61 @@ function main(): void {
 function extractCircle(doc: Document): CircleNewPayload {
   const makerName =
     doc.querySelector<HTMLElement>(".prof_maker_name")?.textContent ?? "";
+  const circleAnnounceWorkList = extractAnnounceWorkList(doc);
   const circleWorkList = extractWorkList(doc);
 
-  return { makerName, circleWorkList };
+  return { makerName, circleAnnounceWorkList, circleWorkList };
+}
+
+function extractAnnounceWorkList(doc: Document): CircleAnnounceWork[] {
+  return Array.from(
+    doc.querySelectorAll<HTMLTableRowElement>(".prof_ana_work tr"),
+  ).map((item): CircleAnnounceWork => {
+    const productId = extractAnnounceProductId(item);
+    const name = item.querySelector(".work_name > a")?.textContent ?? "";
+    const author = extractAnnounceAuthor(item);
+    const category = item.querySelector(".work_category a")?.textContent ?? "";
+    const expectedDate = extractExpectedDate(item);
+    const freeSample = extractFreeSample(item);
+
+    return {
+      productId,
+      name,
+      author,
+      category,
+      expectedDate,
+      freeSample,
+    };
+  });
+}
+
+function extractAnnounceProductId(item: HTMLElement): string {
+  return (
+    item.querySelector<HTMLElement>("[data-product_id]")?.dataset.product_id ??
+    ""
+  );
+}
+
+function extractAnnounceAuthor(item: HTMLElement): string | null {
+  const authorElement = item.querySelector<HTMLElement>(".author");
+
+  return authorElement
+    ? `${authorElement?.textContent}${authorElement.classList.contains("omit") ? " 他" : ""}`
+    : null;
+}
+
+function extractExpectedDate(item: HTMLElement): string {
+  return item.querySelector(".expected_date")?.textContent.trim() ?? "";
+}
+
+function extractFreeSample(item: HTMLElement): boolean {
+  const freeSampleButton = item.querySelector<HTMLElement>(".btn_free_sample");
+
+  if (!freeSampleButton) {
+    return false;
+  }
+
+  return !freeSampleButton.classList.contains("disabled");
 }
 
 function extractWorkList(doc: Document): CircleWork[] {

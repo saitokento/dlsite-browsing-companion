@@ -10,6 +10,15 @@ export interface Work {
   description: string;
 }
 
+export interface CircleAnnounceWork {
+  productId: string;
+  name: string;
+  author: string | null;
+  category: string;
+  expectedDate: string;
+  freeSample: boolean;
+}
+
 export interface CircleWork {
   productId: string;
   category: string;
@@ -59,6 +68,7 @@ export type WorkPayload = {
 
 export type CircleNewPayload = {
   makerName: string;
+  circleAnnounceWorkList: CircleAnnounceWork[];
   circleWorkList: CircleWork[];
 };
 
