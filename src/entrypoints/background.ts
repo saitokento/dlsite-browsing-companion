@@ -41,9 +41,10 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   }
 }
 
-async function handleHomeHello(): Promise<void> {
+async function handleHomeHello(message: { data: string }): Promise<void> {
+  const floor: string = message.data;
   try {
-    await generateComment("home:hello", {});
+    await generateComment("home:hello", { floor });
   } catch (err) {
     console.error("Error generating comment:", err);
   }

@@ -9,7 +9,7 @@ import {
 
 interface ProtocolMap {
   "work:extracted": (data: Work) => void;
-  "home:hello": () => void;
+  "home:hello": (data: string) => void;
   "circle:new": (data: CircleNewPayload) => void;
   "userbuy:page1": (data: UserbuyWork[]) => void;
   "cart:list": (data: CartListPayload) => void;

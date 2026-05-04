@@ -48,6 +48,10 @@ export interface DownloadWork {
   genre: string;
 }
 
+export type HomeHelloPayload = {
+  floor: string;
+};
+
 export type WorkPayload = {
   work: Work;
 };
@@ -79,7 +83,7 @@ type EmptyPayload = Record<string, never>;
 
 export type PayloadByUsecase = {
   work: WorkPayload;
-  "home:hello": EmptyPayload;
+  "home:hello": HomeHelloPayload;
   "circle:new": CircleNewPayload;
   "userbuy:page1": UserbuyPage1Payload;
   "cart:list": CartListPayload;
