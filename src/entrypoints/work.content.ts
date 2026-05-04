@@ -87,7 +87,7 @@ function extractCouponPrice(doc: Document): string | null {
   return priceElement;
 }
 
-function extractPriceAffixes(doc: Document): [string, string] {
+function extractPriceAffixes(_doc: Document): [string, string] {
   // const prefix: string =
   //   doc
   //     .querySelector<HTMLElement>(

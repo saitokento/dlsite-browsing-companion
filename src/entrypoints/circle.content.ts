@@ -135,7 +135,7 @@ function extractOfficialPrice(item: HTMLElement): string {
   );
 }
 
-function extractPriceAffixes(item: HTMLElement): string[] {
+function extractPriceAffixes(_item: HTMLElement): string[] {
   // const prefix = item.querySelector(".work_price_prefix")?.textContent ?? "";
   // const suffix = item.querySelector(".work_price_suffix")?.textContent ?? "";
   // return [prefix, suffix];
