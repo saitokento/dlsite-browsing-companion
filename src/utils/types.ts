@@ -90,7 +90,7 @@ export type DownloadListPayload = {
   downloadWorkList: DownloadWork[];
 };
 
-type EmptyPayload = Record<string, never>;
+// export type EmptyPayload = Record<string, never>;
 
 export type PayloadByUsecase = {
   work: WorkPayload;
