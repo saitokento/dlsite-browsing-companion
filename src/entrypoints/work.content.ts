@@ -113,14 +113,34 @@ function extractGenres(doc: Document): string[] {
 }
 
 function extractDescription(doc: Document): string {
-  const descriptionHtml: string =
-    doc.querySelector<HTMLElement>(
-      'div[itemprop="description"].work_parts_container',
-    )?.innerHTML ?? "";
+  const descriptionElement = doc.querySelector<HTMLElement>(
+    'div[itemprop="description"].work_parts_container',
+  );
 
-  const description = turndownService.turndown(descriptionHtml);
+  if (!descriptionElement) return "";
+
+  const template = doc.createElement("template");
+  template.innerHTML = descriptionElement.innerHTML;
+
+  normalizeUrls(template.content);
+
+  const description = turndownService.turndown(template.innerHTML);
 
   return description;
+}
+
+function normalizeUrls(root: DocumentFragment): void {
+  root
+    .querySelectorAll<HTMLElement>('[href^="//"], [src^="//"]')
+    .forEach((element) => {
+      for (const attr of ["href", "src"] as const) {
+        const value = element.getAttribute(attr);
+
+        if (value?.startsWith("//")) {
+          element.setAttribute(attr, `https:${value}`);
+        }
+      }
+    });
 }
 
 const turndownService = new TurndownService({
