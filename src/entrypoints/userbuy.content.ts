@@ -49,7 +49,7 @@ function extractWorkList(doc: Document): UserbuyWork[] {
 function extractProductId(item: HTMLElement): string {
   return (
     item
-      .querySelector<HTMLElement>('[id^="_link_RJ"]')
+      .querySelector<HTMLElement>('[id^="_link_"]')
       ?.id.replace(/^_link_/, "") ?? ""
   );
 }
