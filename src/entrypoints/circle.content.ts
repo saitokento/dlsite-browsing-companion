@@ -63,7 +63,7 @@ function extractAnnounceAuthor(item: HTMLElement): string | null {
 }
 
 function extractExpectedDate(item: HTMLElement): string {
-  return item.querySelector(".expected_date")?.textContent.trim() ?? "";
+  return item.querySelector(".expected_date")?.textContent?.trim() ?? "";
 }
 
 function extractFreeSample(item: HTMLElement): boolean {
