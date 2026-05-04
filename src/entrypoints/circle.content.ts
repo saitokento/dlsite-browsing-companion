@@ -148,5 +148,5 @@ function extractLabels(item: HTMLElement): string[] {
     item.querySelectorAll<HTMLElement>(".work_deals.work_labels > *"),
   )
     .map((el) => el.textContent)
-    .filter((label) => label.length > 0);
+    .filter((label): label is string => label !== null && label.length > 0);
 }
