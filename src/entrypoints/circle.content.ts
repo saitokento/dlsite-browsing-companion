@@ -41,7 +41,7 @@ function extractWorkList(doc: Document): CircleWork[] {
     const price = extractPrice(item);
     const officialPrice = extractOfficialPrice(item);
     const [pricePrefix, priceSuffix]: string[] = extractPriceAffixes(item);
-    const label = item.querySelector(".work_labels span")?.textContent ?? null;
+    const labels = extractLabels(item);
 
     return {
       productId,
@@ -52,7 +52,7 @@ function extractWorkList(doc: Document): CircleWork[] {
       officialPrice,
       pricePrefix,
       priceSuffix,
-      label,
+      labels,
     };
   });
 }
@@ -91,4 +91,12 @@ function extractPriceAffixes(item: HTMLElement): string[] {
   // return [prefix, suffix];
 
   return ["", "円"];
+}
+
+function extractLabels(item: HTMLElement): string[] {
+  return Array.from(
+    item.querySelectorAll<HTMLElement>(".work_deals.work_labels > *"),
+  )
+    .map((el) => el.textContent)
+    .filter((label) => label.length > 0);
 }

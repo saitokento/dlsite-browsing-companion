@@ -18,7 +18,7 @@ export interface CircleWork {
   officialPrice: string;
   pricePrefix: string;
   priceSuffix: string;
-  label: string | null;
+  labels: string[];
 }
 
 export interface UserbuyWork {
