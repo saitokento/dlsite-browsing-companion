@@ -1,5 +1,6 @@
 export interface Work {
   name: string;
+  makerName: string;
   price: string;
   officialPrice: string;
   couponPrice: string | null;
