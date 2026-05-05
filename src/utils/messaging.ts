@@ -1,11 +1,4 @@
 import { defineExtensionMessaging } from "@webext-core/messaging";
-import {
-  UserbuyWork,
-  Work,
-  CartListPayload,
-  DownloadListPayload,
-  CircleNewPayload,
-} from "@/utils/types";
 
 interface ProtocolMap {
   "work:extracted": (data: Work) => void;
