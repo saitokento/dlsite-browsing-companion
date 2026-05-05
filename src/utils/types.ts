@@ -1,5 +1,6 @@
 export interface Work {
   name: string;
+  makerName: string;
   price: string;
   officialPrice: string;
   couponPrice: string | null;
@@ -9,12 +10,95 @@ export interface Work {
   description: string;
 }
 
+export interface CircleAnnounceWork {
+  productId: string;
+  name: string;
+  author: string | null;
+  category: string;
+  expectedDate: string;
+  freeSample: boolean;
+}
+
+export interface CircleWork {
+  productId: string;
+  category: string;
+  name: string;
+  author: string | null;
+  price: string;
+  officialPrice: string;
+  pricePrefix: string;
+  priceSuffix: string;
+  labels: string[];
+}
+
+export interface UserbuyWork {
+  productId: string;
+  buyDate: string;
+  name: string;
+  makerName: string;
+  genres: string[];
+  price: string;
+  pricePrefix: string;
+  priceSuffix: string;
+}
+
+export interface CartWork {
+  productId: string;
+  name: string;
+  makerName: string;
+  category: string;
+  price: string;
+  officialPrice: string;
+}
+
+export interface DownloadWork {
+  productId: string;
+  name: string;
+  makerName: string;
+  genre: string;
+}
+
+export type HomeHelloPayload = {
+  floor: string;
+};
+
 export type WorkPayload = {
   work: Work;
 };
 
+export type CircleNewPayload = {
+  makerName: string;
+  circleAnnounceWorkList: CircleAnnounceWork[];
+  circleWorkList: CircleWork[];
+};
+
+export type UserbuyPage1Payload = {
+  userbuyWorkList: UserbuyWork[];
+};
+
+export type CartListPayload = {
+  cartWorkList: CartWork[];
+  totalDiscount: string;
+  totalOriginal: string | null;
+  couponName: string | null;
+  totalCoupon: string | null;
+  pricePrefix: string;
+  priceSuffix: string;
+};
+
+export type DownloadListPayload = {
+  downloadWorkList: DownloadWork[];
+};
+
+// export type EmptyPayload = Record<string, never>;
+
 export type PayloadByUsecase = {
   work: WorkPayload;
+  "home:hello": HomeHelloPayload;
+  "circle:new": CircleNewPayload;
+  "userbuy:page1": UserbuyPage1Payload;
+  "cart:list": CartListPayload;
+  "download:list": DownloadListPayload;
 };
 
 export type Usecase = keyof PayloadByUsecase;

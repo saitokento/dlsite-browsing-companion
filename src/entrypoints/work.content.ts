@@ -1,6 +1,4 @@
-import { Work } from "@/utils/types";
 import TurndownService from "turndown";
-import { sendMessage } from "@/utils/messaging";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
@@ -22,6 +20,7 @@ function main(): void {
 
 function extractWork(doc: Document): Work {
   const name: string = extractName(doc);
+  const makerName: string = extractMakerName(doc);
   const price: string = extractPrice(doc);
   const officialPrice: string = extractOfficialPrice(doc);
   const couponPrice: string | null = extractCouponPrice(doc);
@@ -31,6 +30,7 @@ function extractWork(doc: Document): Work {
 
   return {
     name,
+    makerName,
     price,
     officialPrice,
     couponPrice,
@@ -42,32 +42,36 @@ function extractWork(doc: Document): Work {
 }
 
 function extractName(doc: Document): string {
-  const name: string =
+  return (
     doc
       .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-work_name]")
-      ?.getAttribute("data-work_name") ?? "";
+      ?.getAttribute("data-work_name") ?? ""
+  );
+}
 
-  return name;
+function extractMakerName(doc: Document): string {
+  return (
+    doc.querySelector<HTMLElement>("#work_maker .maker_name a")?.textContent ??
+    ""
+  );
 }
 
 function extractPrice(doc: Document): string {
-  const price: string =
+  return (
     doc
       .querySelector<HTMLElement>("#work_buy_box_wrapper > [data-price]")
-      ?.getAttribute("data-price") || "0";
-
-  return price;
+      ?.getAttribute("data-price") || ""
+  );
 }
 
 function extractOfficialPrice(doc: Document): string {
-  const price: string =
+  return (
     doc
       .querySelector<HTMLElement>(
         "#work_buy_box_wrapper > [data-official_price]",
       )
-      ?.getAttribute("data-official_price") || "0";
-
-  return price;
+      ?.getAttribute("data-official_price") || ""
+  );
 }
 
 function extractCouponPrice(doc: Document): string | null {
@@ -83,42 +87,62 @@ function extractCouponPrice(doc: Document): string | null {
   return priceElement;
 }
 
-function extractPriceAffixes(doc: Document): [string, string] {
-  const prefix: string =
-    doc
-      .querySelector<HTMLElement>(
-        "#work_price .work_buy_body .price .work_price_prefix",
-      )
-      ?.textContent?.trim() ?? "";
-  const suffix: string =
-    doc
-      .querySelector<HTMLElement>(
-        "#work_price .work_buy_body .price .work_price_suffix",
-      )
-      ?.textContent?.trim() ?? "";
+function extractPriceAffixes(_doc: Document): [string, string] {
+  // const prefix: string =
+  //   doc
+  //     .querySelector<HTMLElement>(
+  //       "#work_price .work_buy_body .price .work_price_prefix",
+  //     )
+  //     ?.textContent?.trim() ?? "";
+  // const suffix: string =
+  //   doc
+  //     .querySelector<HTMLElement>(
+  //       "#work_price .work_buy_body .price .work_price_suffix",
+  //     )
+  //     ?.textContent?.trim() ?? "";
 
-  return [prefix, suffix];
+  // return [prefix, suffix];
+
+  return ["", "円"];
 }
 
 function extractGenres(doc: Document): string[] {
-  const genres: string[] = Array.from(
+  return Array.from(
     doc.querySelectorAll<HTMLElement>("#work_outline .main_genre a"),
   )
     .map((a) => a.textContent?.trim() ?? "")
     .filter((genre) => genre !== "");
-
-  return genres;
 }
 
 function extractDescription(doc: Document): string {
-  const descriptionHtml: string =
-    doc.querySelector<HTMLElement>(
-      'div[itemprop="description"].work_parts_container',
-    )?.innerHTML ?? "";
+  const descriptionElement = doc.querySelector<HTMLElement>(
+    'div[itemprop="description"].work_parts_container',
+  );
 
-  const description = turndownService.turndown(descriptionHtml);
+  if (!descriptionElement) return "";
+
+  const template = doc.createElement("template");
+  template.innerHTML = descriptionElement.innerHTML;
+
+  normalizeUrls(template.content);
+
+  const description = turndownService.turndown(template.innerHTML);
 
   return description;
+}
+
+function normalizeUrls(root: DocumentFragment): void {
+  root
+    .querySelectorAll<HTMLElement>('[href^="//"], [src^="//"]')
+    .forEach((element) => {
+      for (const attr of ["href", "src"] as const) {
+        const value = element.getAttribute(attr);
+
+        if (value?.startsWith("//")) {
+          element.setAttribute(attr, `https:${value}`);
+        }
+      }
+    });
 }
 
 const turndownService = new TurndownService({
