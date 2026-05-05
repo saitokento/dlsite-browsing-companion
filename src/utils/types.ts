@@ -103,4 +103,21 @@ export type PayloadByUsecase = {
 
 export type Usecase = keyof PayloadByUsecase;
 
-export type CharacterId = "default";
+export const CHARACTER_IDS = ["default", "dela"] as const;
+
+export type CharacterId = (typeof CHARACTER_IDS)[number];
+
+export class Character {
+  readonly id: CharacterId;
+  readonly name: string;
+
+  constructor(id: CharacterId, name: string) {
+    this.id = id;
+    this.name = name;
+  }
+}
+
+export const characters: Character[] = [
+  new Character("default", "デフォルト"),
+  new Character("dela", "でらちゃん"),
+];

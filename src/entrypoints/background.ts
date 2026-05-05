@@ -3,7 +3,7 @@ const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 
 let isStreaming = false;
 
-const characterId: CharacterId = "default";
+let characterId: CharacterId = "default";
 
 export default defineBackground(main);
 
@@ -89,6 +89,9 @@ async function generateComment<U extends Usecase>(
   usecase: U,
   payload: PayloadByUsecase[U],
 ): Promise<void> {
+  characterId =
+    (await storage.getItem<CharacterId>("local:characterId")) ?? "default";
+
   const body = JSON.stringify({
     characterId,
     usecase,
