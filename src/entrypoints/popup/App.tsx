@@ -2,15 +2,38 @@ import { useEffect, useState } from "react";
 import { loadEnabledHomePaths } from "../options/App.tsx";
 import "./App.css";
 
+export const COMMENT_GENERATION_ENABLED_KEY = "local:commentGenerationEnabled";
+
 function App() {
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
+  const [commentGenerationEnabled, setCommentGenerationEnabled] =
+    useState(true);
 
   useEffect(() => {
     loadEnabledHomePaths(setEnabledHomePaths);
+    void loadCommentGenerationEnabled().then(setCommentGenerationEnabled);
   }, []);
+
+  async function handleCommentGenerationChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
+    const enabled = event.currentTarget.checked;
+
+    setCommentGenerationEnabled(enabled);
+    await saveCommentGenerationEnabled(enabled);
+  }
 
   return (
     <>
+      <label>
+        <input
+          type="checkbox"
+          checked={commentGenerationEnabled}
+          onChange={handleCommentGenerationChange}
+        />
+        コメント生成
+      </label>
+
       <div className="home-buttons">
         {homes
           .filter((home) => enabledHomePaths.includes(home.path))
@@ -26,6 +49,18 @@ function App() {
       </div>
     </>
   );
+}
+
+export async function loadCommentGenerationEnabled(): Promise<boolean> {
+  return (
+    (await storage.getItem<boolean>(COMMENT_GENERATION_ENABLED_KEY)) ?? true
+  );
+}
+
+export async function saveCommentGenerationEnabled(
+  enabled: boolean,
+): Promise<void> {
+  await storage.setItem(COMMENT_GENERATION_ENABLED_KEY, enabled);
 }
 
 async function openDLsite(home: Home) {

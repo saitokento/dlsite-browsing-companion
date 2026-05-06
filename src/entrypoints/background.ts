@@ -1,4 +1,5 @@
 import { CHARACTER_ID_KEY, DEBUG_MODE_KEY } from "./options/App.tsx";
+import { loadCommentGenerationEnabled } from "./popup/App.tsx";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
@@ -92,6 +93,13 @@ async function generateComment<U extends Usecase>(
   usecase: U,
   payload: PayloadByUsecase[U],
 ): Promise<void> {
+  const commentGenerationEnabled = await loadCommentGenerationEnabled();
+
+  if (!commentGenerationEnabled) {
+    console.log("Comment generation is disabled; skipping request.");
+    return;
+  }
+
   characterId =
     (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
   debugMode = (await storage.getItem<boolean>(DEBUG_MODE_KEY)) ?? false;
