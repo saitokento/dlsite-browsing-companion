@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
-const CHARACTER_ID_KEY = "local:characterId";
+export const CHARACTER_ID_KEY = "local:characterId";
 export const ENABLED_HOME_PATHS_KEY = "local:enabledHomePaths";
+export const DEBUG_MODE_KEY = "local:debugMode";
 
 function App() {
   const [selectedCharacter, setSelectedCharacter] =
     useState<CharacterId>("default");
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
+  const [debugMode, setDebugMode] = useState(false);
 
   useEffect(() => {
     loadSelectedCharacter(setSelectedCharacter);
     loadEnabledHomePaths(setEnabledHomePaths);
+    loadDebugMode(setDebugMode);
   }, []);
 
   return (
@@ -58,6 +61,18 @@ function App() {
           </label>
         ))}
       </div>
+
+      <details>
+        <summary>開発者用</summary>
+        <label>
+          <input
+            type="checkbox"
+            checked={debugMode}
+            onChange={(event) => handleDebugModeChange(event, setDebugMode)}
+          />
+          デバッグモードを有効にする
+        </label>
+      </details>
     </>
   );
 }
@@ -111,6 +126,33 @@ async function handleHomePathChange(
 
   setEnabledHomePaths(nextEnabledHomePaths);
   await storage.setItem(ENABLED_HOME_PATHS_KEY, nextEnabledHomePaths);
+}
+
+async function loadDebugMode(setDebugMode: (debugMode: boolean) => void) {
+  const savedDebugMode = await storage.getItem<boolean>(DEBUG_MODE_KEY);
+
+  setDebugMode(savedDebugMode ?? false);
+}
+
+async function handleDebugModeChange(
+  event: React.ChangeEvent<HTMLInputElement>,
+  setDebugMode: (debugMode: boolean) => void,
+) {
+  const checked = event.target.checked;
+
+  if (checked) {
+    const accepted = window.confirm(
+      "デバッグモードを有効にすると、バックエンドサーバー上にプロンプトが出力されるようになり、その内容は開発者が確認することがあります。\nプロンプトには、DLsiteの閲覧履歴、購入履歴、カートの内容などの情報が含まれることがあります。\nよろしいですか？",
+    );
+
+    if (!accepted) {
+      setDebugMode(false);
+      return;
+    }
+  }
+
+  setDebugMode(checked);
+  await storage.setItem(DEBUG_MODE_KEY, checked);
 }
 
 export default App;

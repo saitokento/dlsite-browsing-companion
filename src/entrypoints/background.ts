@@ -1,9 +1,12 @@
+import { CHARACTER_ID_KEY, DEBUG_MODE_KEY } from "./options/App.tsx";
+
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 
 let isStreaming = false;
 
 let characterId: CharacterId = "default";
+let debugMode: boolean = false;
 
 export default defineBackground(main);
 
@@ -90,12 +93,14 @@ async function generateComment<U extends Usecase>(
   payload: PayloadByUsecase[U],
 ): Promise<void> {
   characterId =
-    (await storage.getItem<CharacterId>("local:characterId")) ?? "default";
+    (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
+  debugMode = (await storage.getItem<boolean>(DEBUG_MODE_KEY)) ?? false;
 
   const body = JSON.stringify({
     characterId,
     usecase,
     payload: payload,
+    debugMode,
   });
 
   if (isStreaming) {
