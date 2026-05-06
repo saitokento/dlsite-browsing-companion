@@ -2,3 +2,32 @@
   max-width: 1280px;
   padding: 2rem;
 }
+
+.home-checkbox-table {
+  display: grid;
+  border: 1px solid #888;
+}
+
+.home-checkbox-row {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  align-items: center;
+  cursor: pointer;
+}
+
+.home-checkbox-row:not(:last-child) {
+  border-bottom: 1px solid #888;
+}
+
+.home-checkbox-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  border-right: 1px solid #888;
+}
+
+.home-info-cell {
+  display: flex;
+  flex-direction: column;
+}

@@ -121,3 +121,37 @@ export const characters: Character[] = [
   new Character("default", "デフォルト"),
   new Character("dela", "でらちゃん"),
 ];
+
+export class Home {
+  readonly path: string;
+  readonly name: string;
+
+  constructor(path: string, name: string) {
+    this.path = path;
+    this.name = name;
+  }
+}
+
+export const homes: Home[] = [
+  new Home("/home/", "DLsite 同人フロア（全年齢）"),
+  new Home("/soft/", "DLsite PCソフトフロア（全年齢）"),
+  new Home("/app/", "DLsite スマホゲームフロア（全年齢）"),
+  new Home("/ai/", "DLsite AI生成フロア（全年齢）"),
+  new Home("/maniax/", "DLsite 同人フロア（R18）"),
+  new Home("/pro/", "DLsite 美少女ゲームフロア"),
+  new Home("/books/", "DLsite 成年コミックフロア"),
+  new Home("/appx/", "DLsite スマホゲームフロア（R18）"),
+  new Home("/aix/", "DLsite AI生成フロア（R18）"),
+  new Home(
+    "/garumani/voice",
+    "がるまに 乙女向け/TL・BLボイス・ASMRフロア（全年齢）",
+  ),
+  new Home("/girls/", "DLsite がるまに 乙女向け同人フロア"),
+  new Home("/girls-pro/", "DLsite がるまに TLコミック・ティーンズラブフロア"),
+  new Home("/girls-drama/", "DLsite がるまに 乙女向けドラマCDフロア"),
+  new Home("/bl/", "DLsite がるまに BL同人フロア"),
+  new Home("/bl-pro/", "DLsite がるまに BLコミックフロア"),
+  new Home("/bl-drama/", "DLsite がるまに BLドラマCDフロア"),
+  new Home("/home/tool", "DLsite 制作ソフト・素材フロア（全年齢）"),
+  new Home("/maniax/tool", "DLsite 制作ソフト・素材フロア（R18）"),
+];

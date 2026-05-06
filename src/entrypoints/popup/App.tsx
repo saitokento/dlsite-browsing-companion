@@ -1,14 +1,34 @@
+import { useEffect, useState } from "react";
+import { loadEnabledHomePaths } from "../options/App.tsx";
 import "./App.css";
 
 function App() {
+  const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
+
+  useEffect(() => {
+    loadEnabledHomePaths(setEnabledHomePaths);
+  }, []);
+
   return (
     <>
-      <button onClick={openDLsite}>DLsiteを開く</button>
+      <div className="home-buttons">
+        {homes
+          .filter((home) => enabledHomePaths.includes(home.path))
+          .map((home) => (
+            <button
+              key={home.path}
+              type="button"
+              onClick={() => openDLsite(home)}
+            >
+              {home.name}
+            </button>
+          ))}
+      </div>
     </>
   );
 }
 
-async function openDLsite() {
+async function openDLsite(home: Home) {
   const sidePanelPromise = browser.windows
     .getCurrent()
     .then((win) =>
@@ -23,7 +43,7 @@ async function openDLsite() {
     lastFocusedWindow: true,
   });
 
-  const dlsiteUrl = "https://www.dlsite.com/home/";
+  const dlsiteUrl = `https://www.dlsite.com${home.path}`;
 
   if (
     activeTab?.id &&
