@@ -130,6 +130,10 @@ export class Home {
     this.path = path;
     this.name = name;
   }
+
+  get match(): string {
+    return `https://www.dlsite.com${this.path}`;
+  }
 }
 
 export const homes: Home[] = [
