@@ -252,12 +252,19 @@ async function waitForTabComplete(tabId: number): Promise<void> {
 
     browser.tabs.onUpdated.addListener(listener);
 
-    browser.tabs.get(tabId).then((tab) => {
-      if (tab.status === "complete") {
+    browser.tabs
+      .get(tabId)
+      .then((tab) => {
+        if (tab.status === "complete") {
+          clearTimeout(timeoutId);
+          browser.tabs.onUpdated.removeListener(listener);
+          resolve();
+        }
+      })
+      .catch((err) => {
         clearTimeout(timeoutId);
         browser.tabs.onUpdated.removeListener(listener);
-        resolve();
-      }
-    });
+        reject(err);
+      });
   });
 }
