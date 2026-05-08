@@ -117,7 +117,7 @@ export class Character {
   }
 }
 
-export const characters: Character[] = [
+export const characters: readonly Character[] = [
   new Character("default", "デフォルト"),
   new Character("dela", "でらちゃん"),
 ];
@@ -136,7 +136,7 @@ export class Home {
   }
 }
 
-export const homes: Home[] = [
+export const homes: readonly Home[] = [
   new Home("/home/", "DLsite 同人フロア（全年齢）"),
   new Home("/soft/", "DLsite PCソフトフロア（全年齢）"),
   new Home("/app/", "DLsite スマホゲームフロア（全年齢）"),
