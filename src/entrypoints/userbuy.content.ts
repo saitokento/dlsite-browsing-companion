@@ -1,9 +1,13 @@
 export default defineContentScript({
-  matches: ["https://www.dlsite.com/*/mypage/userbuy/=/type/*/start/all*"],
+  matches: ["https://www.dlsite.com/*/mypage/userbuy*"],
   main,
 });
 
 function main(): void {
+  onMessage("userbuy:triggered", handleUserbuyTriggered);
+}
+
+async function handleUserbuyTriggered(): Promise<void> {
   let userbuyWorkList: UserbuyWork[];
   try {
     userbuyWorkList = extractWorkList(document);
@@ -11,8 +15,8 @@ function main(): void {
     console.error("Failed to extract work list:", err);
     return;
   }
-  sendMessage("userbuy:page1", userbuyWorkList).catch((err) => {
-    console.error("Failed to send 'userbuy:page1':", err);
+  sendMessage("userbuy:extracted", userbuyWorkList).catch((err) => {
+    console.error("Failed to send 'userbuy:extracted':", err);
   });
 }
 

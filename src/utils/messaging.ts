@@ -4,7 +4,9 @@ interface ProtocolMap {
   "work:extracted": (data: Work) => void;
   "home:hello": (data: string) => void;
   "circle:new": (data: CircleNewPayload) => void;
-  "userbuy:page1": (data: UserbuyWork[]) => void;
+  "userbuy:open": () => void;
+  "userbuy:triggered": () => void;
+  "userbuy:extracted": (data: UserbuyWork[]) => void;
   "cart:list": (data: CartListPayload) => void;
   "download:list": (data: DownloadListPayload) => void;
   "comment:stream-start": () => void;
