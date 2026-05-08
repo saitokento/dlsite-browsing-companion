@@ -224,12 +224,6 @@ function isUserbuyUrl(url: URL): boolean {
 }
 
 async function waitForTabComplete(tabId: number): Promise<void> {
-  const tab = await browser.tabs.get(tabId);
-
-  if (tab.status === "complete") {
-    return;
-  }
-
   await new Promise<void>((resolve, reject) => {
     const timeoutId = setTimeout(() => {
       browser.tabs.onUpdated.removeListener(listener);
@@ -252,5 +246,13 @@ async function waitForTabComplete(tabId: number): Promise<void> {
     };
 
     browser.tabs.onUpdated.addListener(listener);
+
+    browser.tabs.get(tabId).then((tab) => {
+      if (tab.status === "complete") {
+        clearTimeout(timeoutId);
+        browser.tabs.onUpdated.removeListener(listener);
+        resolve();
+      }
+    });
   });
 }
