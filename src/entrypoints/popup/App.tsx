@@ -75,6 +75,11 @@ async function openDLsite(home: Home) {
     lastFocusedWindow: true,
   });
 
+  if (!activeTab) {
+    console.error("No active tab found.");
+    return;
+  }
+
   const dlsiteUrl = `https://www.dlsite.com${home.path}`;
 
   if (

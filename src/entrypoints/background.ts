@@ -63,6 +63,11 @@ async function handleUserbuyOpen(): Promise<void> {
     lastFocusedWindow: true,
   });
 
+  if (!activeTab) {
+    console.error("No active tab found.");
+    return;
+  }
+
   let targetTabId = activeTab.id;
 
   const userbuyUrl =
