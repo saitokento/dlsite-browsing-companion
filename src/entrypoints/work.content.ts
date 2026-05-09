@@ -1,12 +1,17 @@
 import TurndownService from "turndown";
+import { loadAutoCommentEnabled } from "./popup/App.tsx";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
   main,
 });
 
-function main(): void {
-  commentTriggered();
+async function main() {
+  const autoCommentEnabled = await loadAutoCommentEnabled();
+
+  if (autoCommentEnabled) {
+    commentTriggered();
+  }
 }
 
 function commentTriggered(): void {

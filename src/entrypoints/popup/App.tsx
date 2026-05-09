@@ -2,25 +2,24 @@ import { useEffect, useState } from "react";
 import { loadEnabledHomePaths } from "../options/App.tsx";
 import "./App.css";
 
-export const COMMENT_GENERATION_ENABLED_KEY = "local:commentGenerationEnabled";
+export const AUTO_COMMENT_ENABLED_KEY = "local:autoCommentEnabled";
 
 function App() {
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
-  const [commentGenerationEnabled, setCommentGenerationEnabled] =
-    useState(true);
+  const [autoCommentEnabled, setAutoCommentEnabled] = useState(true);
 
   useEffect(() => {
     loadEnabledHomePaths(setEnabledHomePaths);
-    void loadCommentGenerationEnabled().then(setCommentGenerationEnabled);
+    void loadAutoCommentEnabled().then(setAutoCommentEnabled);
   }, []);
 
-  async function handleCommentGenerationChange(
+  async function handleAutoCommentChange(
     event: React.ChangeEvent<HTMLInputElement>,
   ) {
     const enabled = event.currentTarget.checked;
 
-    setCommentGenerationEnabled(enabled);
-    await saveCommentGenerationEnabled(enabled);
+    setAutoCommentEnabled(enabled);
+    await saveAutoCommentEnabled(enabled);
   }
 
   return (
@@ -28,10 +27,10 @@ function App() {
       <label>
         <input
           type="checkbox"
-          checked={commentGenerationEnabled}
-          onChange={handleCommentGenerationChange}
+          checked={autoCommentEnabled}
+          onChange={handleAutoCommentChange}
         />
-        コメント生成
+        自動コメント
       </label>
 
       <div className="home-buttons">
@@ -55,16 +54,12 @@ function App() {
   );
 }
 
-export async function loadCommentGenerationEnabled(): Promise<boolean> {
-  return (
-    (await storage.getItem<boolean>(COMMENT_GENERATION_ENABLED_KEY)) ?? true
-  );
+export async function loadAutoCommentEnabled(): Promise<boolean> {
+  return (await storage.getItem<boolean>(AUTO_COMMENT_ENABLED_KEY)) ?? true;
 }
 
-export async function saveCommentGenerationEnabled(
-  enabled: boolean,
-): Promise<void> {
-  await storage.setItem(COMMENT_GENERATION_ENABLED_KEY, enabled);
+export async function saveAutoCommentEnabled(enabled: boolean): Promise<void> {
+  await storage.setItem(AUTO_COMMENT_ENABLED_KEY, enabled);
 }
 
 async function handleOpenDLsiteClick(home: Home) {
