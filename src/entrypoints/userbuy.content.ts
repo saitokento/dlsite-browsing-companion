@@ -5,6 +5,7 @@ export default defineContentScript({
 
 function main(): void {
   onMessage("userbuy:triggered", handleUserbuyTriggered);
+  onMessage("popup:comment-triggered", handleUserbuyTriggered);
 }
 
 async function handleUserbuyTriggered(): Promise<void> {
