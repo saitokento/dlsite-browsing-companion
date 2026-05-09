@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import { CharacterId } from "@/utils/types";
 
 export const CHARACTER_ID_KEY = "local:characterId";
 export const ENABLED_HOME_PATHS_KEY = "local:enabledHomePaths";
@@ -80,7 +81,15 @@ function App() {
 async function loadSelectedCharacter(
   setSelectedCharacter: (characterId: CharacterId) => void,
 ) {
-  const savedCharacterId = await storage.getItem<CharacterId>(CHARACTER_ID_KEY);
+  let savedCharacterId: CharacterId =
+    (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
+
+  if (!isCharacterId(savedCharacterId)) {
+    savedCharacterId = "default";
+    console.error(
+      "'local:characterId' in storage is not CharacterId. Falling back to 'default'",
+    );
+  }
 
   if (savedCharacterId) {
     setSelectedCharacter(savedCharacterId);
@@ -91,7 +100,14 @@ async function handleCharacterChange(
   event: React.ChangeEvent<HTMLSelectElement>,
   setSelectedCharacter: (characterId: CharacterId) => void,
 ) {
-  const characterId = event.target.value as CharacterId;
+  let characterId: CharacterId;
+
+  const value = event.target.value;
+  if (!isCharacterId(value)) {
+    characterId = "default";
+    console.error("Selected CharacterID is invaild. Falling back to 'default'");
+  }
+  characterId = value as CharacterId;
 
   setSelectedCharacter(characterId);
   await storage.setItem(CHARACTER_ID_KEY, characterId);
@@ -153,6 +169,10 @@ async function handleDebugModeChange(
 
   setDebugMode(checked);
   await storage.setItem(DEBUG_MODE_KEY, checked);
+}
+
+export function isCharacterId(value: string): value is CharacterId {
+  return (CHARACTER_IDS as readonly string[]).includes(value);
 }
 
 export default App;

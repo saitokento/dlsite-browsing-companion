@@ -1,4 +1,9 @@
-import { CHARACTER_ID_KEY, DEBUG_MODE_KEY } from "./options/App.tsx";
+import { CharacterId } from "@/utils/types.ts";
+import {
+  CHARACTER_ID_KEY,
+  DEBUG_MODE_KEY,
+  isCharacterId,
+} from "./options/App.tsx";
 import { loadCommentGenerationEnabled } from "./popup/App.tsx";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
@@ -160,6 +165,13 @@ async function generateComment<U extends Usecase>(
   characterId =
     (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
   debugMode = (await storage.getItem<boolean>(DEBUG_MODE_KEY)) ?? false;
+
+  if (!isCharacterId(characterId)) {
+    characterId = "default";
+    console.error(
+      "'local:characterId' in storage is invaild CharacterId. Falling back to 'default'",
+    );
+  }
 
   const body = JSON.stringify({
     characterId,
