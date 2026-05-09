@@ -1,9 +1,18 @@
+import { CharacterId } from "@/utils/types.ts";
+import {
+  CHARACTER_ID_KEY,
+  DEBUG_MODE_KEY,
+  isCharacterId,
+} from "./options/App.tsx";
+import { loadCommentGenerationEnabled } from "./popup/App.tsx";
+
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 
 let isStreaming = false;
 
-const characterId: CharacterId = "default";
+let characterId: CharacterId = "default";
+let debugMode: boolean = false;
 
 export default defineBackground(main);
 
@@ -18,7 +27,8 @@ function main(): void {
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
-  onMessage("userbuy:page1", handleUserbuyPage1);
+  onMessage("userbuy:open", handleUserbuyOpen);
+  onMessage("userbuy:extracted", handleUserbuyExtracted);
   onMessage("cart:list", handleCartList);
   onMessage("download:list", handleDownloadList);
 }
@@ -52,7 +62,63 @@ async function handleCircleNew(message: {
   }
 }
 
-async function handleUserbuyPage1(message: {
+async function handleUserbuyOpen(): Promise<void> {
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
+
+  if (!activeTab) {
+    console.error("No active tab found.");
+    return;
+  }
+
+  let targetTabId = activeTab.id;
+
+  const userbuyUrl =
+    "https://www.dlsite.com/home/mypage/userbuy/=/type/all/start/all/sort/1/order/1";
+
+  const currentUrl = activeTab.url ? new URL(activeTab.url) : undefined;
+
+  if (!currentUrl || !isUserbuyUrl(currentUrl)) {
+    if (
+      targetTabId !== undefined &&
+      (activeTab.url === "chrome://newtab/" || activeTab.url === "about:newtab")
+    ) {
+      const updatedTab = await browser.tabs.update(targetTabId, {
+        url: userbuyUrl,
+        active: true,
+      });
+
+      targetTabId = updatedTab?.id;
+    } else {
+      const win = await browser.windows.getCurrent();
+
+      const createdTab = await browser.tabs.create({
+        windowId: win.id,
+        url: userbuyUrl,
+        active: true,
+      });
+
+      targetTabId = createdTab.id;
+    }
+  }
+
+  if (targetTabId === undefined) {
+    console.error("Failed to resolve target tab id.");
+    return;
+  }
+
+  await waitForTabComplete(targetTabId);
+
+  await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
+    (err) => {
+      console.error("Failed to send 'userbuy:triggered':", err);
+    },
+  );
+}
+
+async function handleUserbuyExtracted(message: {
   data: UserbuyWork[];
 }): Promise<void> {
   const userbuyWorkList: UserbuyWork[] = message.data;
@@ -89,10 +155,29 @@ async function generateComment<U extends Usecase>(
   usecase: U,
   payload: PayloadByUsecase[U],
 ): Promise<void> {
+  const commentGenerationEnabled = await loadCommentGenerationEnabled();
+
+  if (!commentGenerationEnabled) {
+    console.log("Comment generation is disabled; skipping request.");
+    return;
+  }
+
+  characterId =
+    (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
+  debugMode = (await storage.getItem<boolean>(DEBUG_MODE_KEY)) ?? false;
+
+  if (!isCharacterId(characterId)) {
+    characterId = "default";
+    console.error(
+      "'local:characterId' in storage is invaild CharacterId. Falling back to 'default'",
+    );
+  }
+
   const body = JSON.stringify({
     characterId,
     usecase,
     payload: payload,
+    debugMode,
   });
 
   if (isStreaming) {
@@ -141,4 +226,57 @@ async function generateComment<U extends Usecase>(
   } finally {
     isStreaming = false;
   }
+}
+
+function isUserbuyUrl(url: URL): boolean {
+  try {
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "www.dlsite.com" &&
+      /^\/[^/]+\/mypage\/userbuy(?:\/|$)/.test(url.pathname)
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function waitForTabComplete(tabId: number): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      browser.tabs.onUpdated.removeListener(listener);
+      reject(new Error("Timed out waiting for tab to complete loading."));
+    }, 30_000);
+
+    const listener: Parameters<typeof browser.tabs.onUpdated.addListener>[0] = (
+      updatedTabId: number,
+      changeInfo: Browser.tabs.OnUpdatedInfo,
+    ) => {
+      if (updatedTabId !== tabId) {
+        return;
+      }
+
+      if (changeInfo.status === "complete") {
+        clearTimeout(timeoutId);
+        browser.tabs.onUpdated.removeListener(listener);
+        resolve();
+      }
+    };
+
+    browser.tabs.onUpdated.addListener(listener);
+
+    browser.tabs
+      .get(tabId)
+      .then((tab) => {
+        if (tab.status === "complete") {
+          clearTimeout(timeoutId);
+          browser.tabs.onUpdated.removeListener(listener);
+          resolve();
+        }
+      })
+      .catch((err) => {
+        clearTimeout(timeoutId);
+        browser.tabs.onUpdated.removeListener(listener);
+        reject(err);
+      });
+  });
 }
