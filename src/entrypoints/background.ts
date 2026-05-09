@@ -46,7 +46,7 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
 async function handleHomeOpen(message: { data: Home }): Promise<void> {
   const home: Home = message.data;
   const targetTabId: number | undefined = await openDLsite(home);
-  if (targetTabId) {
+  if (targetTabId !== undefined) {
     await sendMessage("home:triggered", undefined, targetTabId).catch((err) => {
       console.error("Failed to send 'triggered':", err);
     });
@@ -75,7 +75,7 @@ async function handleCircleNew(message: {
 
 async function handleUserbuyOpen(): Promise<void> {
   const targetTabId: number | undefined = await openUserbuy();
-  if (targetTabId) {
+  if (targetTabId !== undefined) {
     await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
       (err) => {
         console.error("Failed to send 'userbuy:triggered':", err);
