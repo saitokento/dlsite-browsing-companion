@@ -6,6 +6,10 @@ export default defineContentScript({
 });
 
 function main(): void {
+  commentTriggered();
+}
+
+function commentTriggered(): void {
   let work: Work;
   try {
     work = extractWork(document);

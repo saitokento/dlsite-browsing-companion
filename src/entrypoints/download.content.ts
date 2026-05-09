@@ -4,6 +4,10 @@ export default defineContentScript({
 });
 
 function main(): void {
+  commentTriggered();
+}
+
+function commentTriggered(): void {
   let downloadWorkList: DownloadWork[];
   try {
     downloadWorkList = extractWorkList(document);
