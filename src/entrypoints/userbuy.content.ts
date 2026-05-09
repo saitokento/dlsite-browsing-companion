@@ -1,3 +1,5 @@
+import { waitDomReady } from "@/utils/functions.ts";
+
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/mypage/userbuy*"],
   main,
@@ -10,6 +12,7 @@ function main(): void {
 
 async function handleUserbuyTriggered(): Promise<void> {
   let userbuyWorkList: UserbuyWork[];
+  await waitDomReady(10_000);
   try {
     userbuyWorkList = extractWorkList(document);
   } catch (err) {

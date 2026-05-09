@@ -175,12 +175,12 @@ async function updateDomReadyState(
   }
 
   try {
-    const results = await browser.scripting.executeScript({
-      target: { tabId },
-      func: () => document.readyState !== "loading",
+    const isDomReady = await sendMessage("popup:wait-dom-ready", {
+      tabId,
+      timeoutMs: 10_000,
     });
 
-    setIsActiveTabDomReady(Boolean(results[0]?.result));
+    setIsActiveTabDomReady(isDomReady);
   } catch (err) {
     console.error("Failed to check DOM ready state:", err);
     setIsActiveTabDomReady(false);

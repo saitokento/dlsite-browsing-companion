@@ -1,3 +1,4 @@
+import { waitDomReady } from "@/utils/functions.ts";
 import { loadAutoCommentEnabled } from "./popup/App.tsx";
 
 export default defineContentScript({
@@ -9,6 +10,7 @@ async function main() {
   const autoCommentEnabled = await loadAutoCommentEnabled();
 
   if (autoCommentEnabled) {
+    await waitDomReady(10_000);
     commentTriggered();
   }
 

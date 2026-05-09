@@ -23,6 +23,8 @@ function main(): void {
     throw new Error("Missing required environment variable: BACKEND_URL");
   }
 
+  onMessage("popup:wait-dom-ready", handlePopupWaitDomReady);
+  onMessage("content:wait-dom-ready", handleContentWaitDomReady);
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:open", handleHomeOpen);
   onMessage("home:hello", handleHomeHello);
@@ -31,6 +33,33 @@ function main(): void {
   onMessage("userbuy:extracted", handleUserbuyExtracted);
   onMessage("cart:list", handleCartList);
   onMessage("download:list", handleDownloadList);
+}
+
+async function handlePopupWaitDomReady({
+  data,
+}: {
+  data: {
+    tabId: number;
+    timeoutMs?: number;
+  };
+}): Promise<boolean> {
+  return waitUntilDomReady(data.tabId, data.timeoutMs);
+}
+
+async function handleContentWaitDomReady({
+  data,
+  sender,
+}: {
+  data: { timeoutMs?: number };
+  sender: Browser.runtime.MessageSender;
+}): Promise<boolean> {
+  const tabId = sender.tab?.id;
+
+  if (tabId === undefined) {
+    return false;
+  }
+
+  return waitUntilDomReady(tabId, data.timeoutMs);
 }
 
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
@@ -113,6 +142,44 @@ async function handleDownloadList(message: {
     await generateComment("download:list", downloadListPayload);
   } catch (err) {
     console.error("Error generating comment:", err);
+  }
+}
+
+async function waitUntilDomReady(
+  tabId: number,
+  timeoutMs = 10_000,
+): Promise<boolean> {
+  try {
+    const results = await browser.scripting.executeScript({
+      target: { tabId },
+      args: [timeoutMs],
+      func: (timeoutMs: number) => {
+        return new Promise<boolean>((resolve) => {
+          if (document.readyState !== "loading") {
+            resolve(true);
+            return;
+          }
+
+          const timeoutId = window.setTimeout(() => {
+            resolve(false);
+          }, timeoutMs);
+
+          document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+              window.clearTimeout(timeoutId);
+              resolve(true);
+            },
+            { once: true },
+          );
+        });
+      },
+    });
+
+    return Boolean(results[0]?.result);
+  } catch (err) {
+    console.error("Failed to wait until DOM ready:", err);
+    return false;
   }
 }
 

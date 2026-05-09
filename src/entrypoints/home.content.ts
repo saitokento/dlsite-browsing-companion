@@ -1,3 +1,5 @@
+import { waitDomReady } from "@/utils/functions.ts";
+
 const homeByPath = new Map(homes.map((home) => [home.path, home]));
 
 export default defineContentScript({
@@ -14,6 +16,7 @@ async function handleHomeTriggered(): Promise<void> {
   const floor: string = homeByPath.get(url.pathname)?.name ?? "";
 
   if (floor !== "") {
+    await waitDomReady(10_000);
     sendMessage("home:hello", floor).catch((err) => {
       console.error("Failed to send 'home:hello':", err);
     });

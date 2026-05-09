@@ -1,5 +1,6 @@
 import TurndownService from "turndown";
 import { loadAutoCommentEnabled } from "./popup/App.tsx";
+import { waitDomReady } from "@/utils/functions.ts";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
@@ -10,6 +11,7 @@ async function main() {
   const autoCommentEnabled = await loadAutoCommentEnabled();
 
   if (autoCommentEnabled) {
+    await waitDomReady(10_000);
     commentTriggered();
   }
 
