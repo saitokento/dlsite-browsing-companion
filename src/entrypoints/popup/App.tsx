@@ -14,7 +14,7 @@ const COMMENT_ENABLED_URL_PATTERNS = [
 function App() {
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
   const [autoCommentEnabled, setAutoCommentEnabled] = useState(true);
-  const activeTab = useActiveTab();
+  const { activeTab, isDomReady } = useActiveTab();
 
   useEffect(() => {
     loadEnabledHomePaths(setEnabledHomePaths);
@@ -22,7 +22,7 @@ function App() {
   }, []);
 
   const isCommentButtonDisabled =
-    !isCommentEnabledUrl(activeTab?.url) || activeTab?.status !== "complete";
+    !isCommentEnabledUrl(activeTab?.url) || !isDomReady;
 
   async function handleAutoCommentChange(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -74,12 +74,13 @@ function App() {
 
 function useActiveTab() {
   const [activeTab, setActiveTab] = useState<Browser.tabs.Tab | undefined>();
+  const [isDomReady, setIsDomReady] = useState(false);
 
   useEffect(() => {
-    return setupActiveTabWatcher(setActiveTab);
+    return setupActiveTabWatcher(setActiveTab, setIsDomReady);
   }, []);
 
-  return activeTab;
+  return { activeTab, isDomReady };
 }
 
 export async function loadAutoCommentEnabled(): Promise<boolean> {
@@ -116,11 +117,12 @@ function setupActiveTabWatcher(
   setActiveTab: React.Dispatch<
     React.SetStateAction<Browser.tabs.Tab | undefined>
   >,
+  setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
-  void updateActiveTab(setActiveTab);
+  void updateActiveTabState(setActiveTab, setIsActiveTabDomReady);
 
   const handleActivated = () => {
-    void updateActiveTab(setActiveTab);
+    void updateActiveTabState(setActiveTab, setIsActiveTabDomReady);
   };
 
   const handleUpdated = (
@@ -128,8 +130,14 @@ function setupActiveTabWatcher(
     changeInfo: Browser.tabs.OnUpdatedInfo,
     tab: Browser.tabs.Tab,
   ) => {
-    if (tab.active) {
-      setActiveTab(tab);
+    if (!tab.active) {
+      return;
+    }
+
+    setActiveTab(tab);
+
+    if (changeInfo.status || changeInfo.url) {
+      void updateDomReadyState(tab.id, setIsActiveTabDomReady);
     }
   };
 
@@ -142,10 +150,11 @@ function setupActiveTabWatcher(
   };
 }
 
-async function updateActiveTab(
+async function updateActiveTabState(
   setActiveTab: React.Dispatch<
     React.SetStateAction<Browser.tabs.Tab | undefined>
   >,
+  setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
   const [tab] = await browser.tabs.query({
     active: true,
@@ -153,6 +162,29 @@ async function updateActiveTab(
   });
 
   setActiveTab(tab);
+  await updateDomReadyState(tab?.id, setIsActiveTabDomReady);
+}
+
+async function updateDomReadyState(
+  tabId: number | undefined,
+  setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
+) {
+  if (tabId === undefined) {
+    setIsActiveTabDomReady(false);
+    return;
+  }
+
+  try {
+    const results = await browser.scripting.executeScript({
+      target: { tabId },
+      func: () => document.readyState !== "loading",
+    });
+
+    setIsActiveTabDomReady(Boolean(results[0]?.result));
+  } catch (err) {
+    console.error("Failed to check DOM ready state:", err);
+    setIsActiveTabDomReady(false);
+  }
 }
 
 function isCommentEnabledUrl(url?: string): boolean {
