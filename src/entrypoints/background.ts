@@ -74,59 +74,14 @@ async function handleCircleNew(message: {
 }
 
 async function handleUserbuyOpen(): Promise<void> {
-  const [activeTab] = await browser.tabs.query({
-    active: true,
-    lastFocusedWindow: true,
-  });
-
-  if (!activeTab) {
-    console.error("No active tab found.");
-    return;
+  const targetTabId: number | undefined = await openUserbuy();
+  if (targetTabId) {
+    await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
+      (err) => {
+        console.error("Failed to send 'userbuy:triggered':", err);
+      },
+    );
   }
-
-  let targetTabId = activeTab.id;
-
-  const userbuyUrl =
-    "https://www.dlsite.com/home/mypage/userbuy/=/type/all/start/all/sort/1/order/1";
-
-  const currentUrl = activeTab.url ? new URL(activeTab.url) : undefined;
-
-  if (!currentUrl || !isUserbuyUrl(currentUrl)) {
-    if (
-      targetTabId !== undefined &&
-      (activeTab.url === "chrome://newtab/" || activeTab.url === "about:newtab")
-    ) {
-      const updatedTab = await browser.tabs.update(targetTabId, {
-        url: userbuyUrl,
-        active: true,
-      });
-
-      targetTabId = updatedTab?.id;
-    } else {
-      const win = await browser.windows.getCurrent();
-
-      const createdTab = await browser.tabs.create({
-        windowId: win.id,
-        url: userbuyUrl,
-        active: true,
-      });
-
-      targetTabId = createdTab.id;
-    }
-  }
-
-  if (targetTabId === undefined) {
-    console.error("Failed to resolve target tab id.");
-    return;
-  }
-
-  await waitForTabComplete(targetTabId);
-
-  await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
-    (err) => {
-      console.error("Failed to send 'userbuy:triggered':", err);
-    },
-  );
 }
 
 async function handleUserbuyExtracted(message: {
@@ -197,6 +152,58 @@ async function openDLsite(home: Home): Promise<number | undefined> {
     });
 
     targetTabId = createdTab.id;
+  }
+
+  if (targetTabId === undefined) {
+    console.error("Failed to resolve target tab id.");
+    return;
+  }
+
+  await waitForTabComplete(targetTabId);
+
+  return targetTabId;
+}
+
+async function openUserbuy(): Promise<number | undefined> {
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
+
+  if (!activeTab) {
+    console.error("No active tab found.");
+    return;
+  }
+
+  let targetTabId = activeTab.id;
+
+  const userbuyUrl =
+    "https://www.dlsite.com/home/mypage/userbuy/=/type/all/start/all/sort/1/order/1";
+
+  const currentUrl = activeTab.url ? new URL(activeTab.url) : undefined;
+
+  if (!currentUrl || !isUserbuyUrl(currentUrl)) {
+    if (
+      targetTabId !== undefined &&
+      (activeTab.url === "chrome://newtab/" || activeTab.url === "about:newtab")
+    ) {
+      const updatedTab = await browser.tabs.update(targetTabId, {
+        url: userbuyUrl,
+        active: true,
+      });
+
+      targetTabId = updatedTab?.id;
+    } else {
+      const win = await browser.windows.getCurrent();
+
+      const createdTab = await browser.tabs.create({
+        windowId: win.id,
+        url: userbuyUrl,
+        active: true,
+      });
+
+      targetTabId = createdTab.id;
+    }
   }
 
   if (targetTabId === undefined) {
