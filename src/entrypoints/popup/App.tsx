@@ -24,6 +24,9 @@ function App() {
 
   return (
     <>
+      <button type="button" onClick={handleCommentTriggerClick}>
+        コメント
+      </button>
       <label>
         <input
           type="checkbox"
@@ -60,6 +63,28 @@ export async function loadAutoCommentEnabled(): Promise<boolean> {
 
 export async function saveAutoCommentEnabled(enabled: boolean): Promise<void> {
   await storage.setItem(AUTO_COMMENT_ENABLED_KEY, enabled);
+}
+
+async function handleCommentTriggerClick() {
+  const sidePanelPromise = openSidePanel().catch(console.error);
+
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
+
+  if (!activeTab) {
+    console.error("No active tab found.");
+    return;
+  }
+
+  await sendMessage("popup:comment-triggered", undefined, activeTab.id).catch(
+    (err) => {
+      console.error("Failed to send 'popup:comment-triggered':", err);
+    },
+  );
+
+  await sidePanelPromise;
 }
 
 async function handleOpenDLsiteClick(home: Home) {

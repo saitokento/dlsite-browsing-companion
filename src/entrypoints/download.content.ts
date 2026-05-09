@@ -11,6 +11,8 @@ async function main() {
   if (autoCommentEnabled) {
     commentTriggered();
   }
+
+  onMessage("popup:comment-triggered", commentTriggered);
 }
 
 function commentTriggered(): void {

@@ -1,6 +1,7 @@
 import { defineExtensionMessaging } from "@webext-core/messaging";
 
 export interface ProtocolMap {
+  "popup:comment-triggered": () => void;
   "work:extracted": (data: Work) => void;
   "home:open": (data: Home) => void;
   "home:triggered": () => void;
