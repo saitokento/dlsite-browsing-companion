@@ -1,7 +1,9 @@
 import { defineExtensionMessaging } from "@webext-core/messaging";
 
-interface ProtocolMap {
+export interface ProtocolMap {
   "work:extracted": (data: Work) => void;
+  "home:open": (data: Home) => void;
+  "home:triggered": () => void;
   "home:hello": (data: string) => void;
   "circle:new": (data: CircleNewPayload) => void;
   "userbuy:open": () => void;

@@ -25,6 +25,7 @@ function main(): void {
   }
 
   onMessage("work:extracted", handleWorkExtracted);
+  onMessage("home:open", handleHomeOpen);
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
   onMessage("userbuy:open", handleUserbuyOpen);
@@ -39,6 +40,16 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
     await generateComment("work", { work });
   } catch (err) {
     console.error("Error generating comment:", err);
+  }
+}
+
+async function handleHomeOpen(message: { data: Home }): Promise<void> {
+  const home: Home = message.data;
+  const targetTabId: number | undefined = await openDLsite(home);
+  if (targetTabId !== undefined) {
+    await sendMessage("home:triggered", undefined, targetTabId).catch((err) => {
+      console.error("Failed to send 'triggered':", err);
+    });
   }
 }
 
@@ -63,6 +74,97 @@ async function handleCircleNew(message: {
 }
 
 async function handleUserbuyOpen(): Promise<void> {
+  const targetTabId: number | undefined = await openUserbuy();
+  if (targetTabId !== undefined) {
+    await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
+      (err) => {
+        console.error("Failed to send 'userbuy:triggered':", err);
+      },
+    );
+  }
+}
+
+async function handleUserbuyExtracted(message: {
+  data: UserbuyWork[];
+}): Promise<void> {
+  const userbuyWorkList: UserbuyWork[] = message.data;
+  try {
+    await generateComment("userbuy:page1", { userbuyWorkList });
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function handleCartList(message: {
+  data: CartListPayload;
+}): Promise<void> {
+  const cartListPayload: CartListPayload = message.data;
+  try {
+    await generateComment("cart:list", cartListPayload);
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function handleDownloadList(message: {
+  data: DownloadListPayload;
+}): Promise<void> {
+  const downloadListPayload: DownloadListPayload = message.data;
+  try {
+    await generateComment("download:list", downloadListPayload);
+  } catch (err) {
+    console.error("Error generating comment:", err);
+  }
+}
+
+async function openDLsite(home: Home): Promise<number | undefined> {
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
+
+  if (!activeTab) {
+    console.error("No active tab found.");
+    return;
+  }
+
+  let targetTabId = activeTab.id;
+
+  const dlsiteUrl = `https://www.dlsite.com${home.path}`;
+
+  if (
+    targetTabId !== undefined &&
+    (activeTab.url === "chrome://newtab/" || activeTab.url === "about:newtab")
+  ) {
+    const updatedTab = await browser.tabs.update(targetTabId, {
+      url: dlsiteUrl,
+      active: true,
+    });
+
+    targetTabId = updatedTab?.id;
+  } else {
+    const win = await browser.windows.getCurrent();
+
+    const createdTab = await browser.tabs.create({
+      windowId: win.id,
+      url: dlsiteUrl,
+      active: true,
+    });
+
+    targetTabId = createdTab.id;
+  }
+
+  if (targetTabId === undefined) {
+    console.error("Failed to resolve target tab id.");
+    return;
+  }
+
+  await waitForTabComplete(targetTabId);
+
+  return targetTabId;
+}
+
+async function openUserbuy(): Promise<number | undefined> {
   const [activeTab] = await browser.tabs.query({
     active: true,
     lastFocusedWindow: true,
@@ -111,44 +213,7 @@ async function handleUserbuyOpen(): Promise<void> {
 
   await waitForTabComplete(targetTabId);
 
-  await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
-    (err) => {
-      console.error("Failed to send 'userbuy:triggered':", err);
-    },
-  );
-}
-
-async function handleUserbuyExtracted(message: {
-  data: UserbuyWork[];
-}): Promise<void> {
-  const userbuyWorkList: UserbuyWork[] = message.data;
-  try {
-    await generateComment("userbuy:page1", { userbuyWorkList });
-  } catch (err) {
-    console.error("Error generating comment:", err);
-  }
-}
-
-async function handleCartList(message: {
-  data: CartListPayload;
-}): Promise<void> {
-  const cartListPayload: CartListPayload = message.data;
-  try {
-    await generateComment("cart:list", cartListPayload);
-  } catch (err) {
-    console.error("Error generating comment:", err);
-  }
-}
-
-async function handleDownloadList(message: {
-  data: DownloadListPayload;
-}): Promise<void> {
-  const downloadListPayload: DownloadListPayload = message.data;
-  try {
-    await generateComment("download:list", downloadListPayload);
-  } catch (err) {
-    console.error("Error generating comment:", err);
-  }
+  return targetTabId;
 }
 
 async function generateComment<U extends Usecase>(

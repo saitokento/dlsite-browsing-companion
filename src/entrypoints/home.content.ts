@@ -6,6 +6,10 @@ export default defineContentScript({
 });
 
 function main(): void {
+  onMessage("home:triggered", handleHomeTriggered);
+}
+
+async function handleHomeTriggered(): Promise<void> {
   const url = new URL(window.location.href);
   const floor: string = homeByPath.get(url.pathname)?.name ?? "";
 

@@ -41,7 +41,7 @@ function App() {
             <button
               key={home.path}
               type="button"
-              onClick={() => openDLsite(home)}
+              onClick={() => handleOpenDLsiteClick(home)}
             >
               {home.name}
             </button>
@@ -67,37 +67,12 @@ export async function saveCommentGenerationEnabled(
   await storage.setItem(COMMENT_GENERATION_ENABLED_KEY, enabled);
 }
 
-async function openDLsite(home: Home) {
-  const sidePanelPromise = openSidePanel();
+async function handleOpenDLsiteClick(home: Home) {
+  const sidePanelPromise = openSidePanel().catch(console.error);
 
-  const [activeTab] = await browser.tabs.query({
-    active: true,
-    lastFocusedWindow: true,
+  await sendMessage("home:open", home).catch((err) => {
+    console.error("Failed to send 'home:open':", err);
   });
-
-  if (!activeTab) {
-    console.error("No active tab found.");
-    return;
-  }
-
-  const dlsiteUrl = `https://www.dlsite.com${home.path}`;
-
-  if (
-    activeTab?.id &&
-    (activeTab.url === "chrome://newtab/" || activeTab.url === "about:newtab")
-  ) {
-    await browser.tabs.update(activeTab.id, {
-      url: dlsiteUrl,
-      active: true,
-    });
-  } else {
-    const win = await browser.windows.getCurrent();
-    await browser.tabs.create({
-      windowId: win.id,
-      url: dlsiteUrl,
-      active: true,
-    });
-  }
 
   await sidePanelPromise;
 }
