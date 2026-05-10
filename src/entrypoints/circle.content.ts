@@ -7,14 +7,14 @@ export default defineContentScript({
 });
 
 async function main() {
+  onMessage("popup:comment-triggered", commentTriggered);
+
   const autoCommentEnabled = await loadAutoCommentEnabled();
 
   if (autoCommentEnabled) {
     await waitDomReady(10_000);
     commentTriggered();
   }
-
-  onMessage("popup:comment-triggered", commentTriggered);
 }
 
 function commentTriggered(): void {
