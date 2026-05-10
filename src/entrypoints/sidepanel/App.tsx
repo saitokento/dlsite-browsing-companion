@@ -1,22 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { CharacterId, CommentHistoryItem } from "@/utils/types.ts";
+import {
+  CHARACTER_ID_KEY,
+  isCharacterId,
+  pruneExpiredCommentHistory,
+} from "@/utils/exports";
 import "./App.css";
 
 function App() {
-  const [commentList, setCommentList] = useState<string[]>([]);
+  const [commentList, setCommentList] = useState<CommentHistoryItem[]>([]);
+  const hasStreamEntryRef = useRef(false);
 
   useEffect(() => {
+    let active = true;
+
+    loadCommentHistory()
+      .then((commentHistory) => {
+        if (active) {
+          setCommentList((prev) =>
+            prev.length === 0 ? commentHistory : [...commentHistory, ...prev],
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to load comment history:", err);
+      });
+
     const removeStreamStartListener = onMessage("comment:stream-start", () => {
+      hasStreamEntryRef.current = true;
       setCommentList(startNewComment);
     });
 
     const removeStreamChunkListener = onMessage(
       "comment:stream-chunk",
       (message) => {
-        setCommentList((prev) => appendChunkToLastComment(prev, message.data));
+        setCommentList((prev) => {
+          const [next, created] = appendChunkToLastComment(
+            prev,
+            message.data,
+            hasStreamEntryRef.current,
+          );
+          if (created) {
+            hasStreamEntryRef.current = true;
+          }
+          return next;
+        });
       },
     );
 
     return () => {
+      active = false;
       removeStreamStartListener();
       removeStreamChunkListener();
     };
@@ -25,31 +58,73 @@ function App() {
   return (
     <div className="comment-list">
       {commentList.map((item, index) => (
-        <div key={index} className="comment-item">
-          <p className="comment-text">{item}</p>
+        <div key={`${item.createdAt}-${index}`} className="comment-item">
+          <p className="comment-text">{item.text}</p>
         </div>
       ))}
     </div>
   );
 }
 
-function startNewComment(prev: string[]): string[] {
-  if (prev.length < 1 || prev[prev.length - 1] !== "") {
-    return [...prev, ""];
+function startNewComment(prev: CommentHistoryItem[]): CommentHistoryItem[] {
+  if (prev.length < 1 || prev[prev.length - 1].text !== "") {
+    return [
+      ...prev,
+      {
+        text: "",
+        createdAt: new Date().toISOString(),
+      },
+    ];
   }
+
   return prev;
 }
 
-function appendChunkToLastComment(prev: string[], chunk: string): string[] {
+function appendChunkToLastComment(
+  prev: CommentHistoryItem[],
+  chunk: string,
+  hasStreamEntry: boolean,
+): [CommentHistoryItem[], boolean] {
   const updated = [...prev];
-  if (updated.length === 0) {
+  let created = false;
+
+  if (!hasStreamEntry) {
     console.warn(
       "'comment:stream-chunk' received before 'comment:stream-start'.",
     );
-    updated.push("");
+
+    updated.push({
+      text: "",
+      createdAt: new Date().toISOString(),
+    });
+    created = true;
   }
-  updated[updated.length - 1] += chunk;
-  return updated;
+
+  const lastIndex = updated.length - 1;
+  const lastItem = updated[lastIndex];
+
+  updated[lastIndex] = {
+    ...lastItem,
+    text: lastItem.text + chunk,
+  };
+
+  return [updated, created];
+}
+
+async function loadCommentHistory(): Promise<CommentHistoryItem[]> {
+  let characterId =
+    (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
+
+  if (!isCharacterId(characterId)) {
+    characterId = "default";
+  }
+
+  const commentHistoryKey: `local:${string}` = `local:commentHistory:${characterId}`;
+
+  const commentHistory =
+    (await storage.getItem<CommentHistoryItem[]>(commentHistoryKey)) ?? [];
+
+  return pruneExpiredCommentHistory(commentHistory);
 }
 
 export default App;

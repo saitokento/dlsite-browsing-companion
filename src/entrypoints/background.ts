@@ -1,8 +1,14 @@
-import { CharacterId, CommentStreamEvent } from "@/utils/types.ts";
+import {
+  CharacterId,
+  CommentStreamEvent,
+  CommentHistoryItem,
+  CurrentComment,
+} from "@/utils/types.ts";
 import {
   CHARACTER_ID_KEY,
   DEBUG_MODE_KEY,
   isCharacterId,
+  pruneExpiredCommentHistory,
 } from "@/utils/exports";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
@@ -298,6 +304,7 @@ async function generateComment<U extends Usecase>(
   }
 
   const previousResponseIdKey: `local:${string}` = `local:xaiPreviousResponseId:${characterId}`;
+  const commentHistoryKey: `local:${string}` = `local:commentHistory:${characterId}`;
 
   const previousResponseId = await storage.getItem<string>(
     previousResponseIdKey,
@@ -345,6 +352,11 @@ async function generateComment<U extends Usecase>(
 
     await sendMessage("comment:stream-start");
 
+    const currentComment: CurrentComment = {
+      text: "",
+      createdAt: new Date().toISOString(),
+    };
+
     let buffer = "";
 
     for await (const chunk of stream) {
@@ -355,14 +367,24 @@ async function generateComment<U extends Usecase>(
         const line = buffer.slice(0, newlineIndex);
         buffer = buffer.slice(newlineIndex + 1);
 
-        await handleCommentStreamLine(line, previousResponseIdKey);
+        await handleCommentStreamLine(
+          line,
+          previousResponseIdKey,
+          commentHistoryKey,
+          currentComment,
+        );
 
         newlineIndex = buffer.indexOf("\n");
       }
     }
 
     if (buffer.trim().length > 0) {
-      await handleCommentStreamLine(buffer, previousResponseIdKey);
+      await handleCommentStreamLine(
+        buffer,
+        previousResponseIdKey,
+        commentHistoryKey,
+        currentComment,
+      );
     }
   } catch (err) {
     if (err instanceof Error) {
@@ -431,6 +453,8 @@ async function waitForTabComplete(tabId: number): Promise<void> {
 async function handleCommentStreamLine(
   line: string,
   previousResponseIdKey: `local:${string}`,
+  commentHistoryKey: `local:${string}`,
+  currentComment: CurrentComment,
 ): Promise<void> {
   const trimmedLine = line.trim();
 
@@ -452,12 +476,14 @@ async function handleCommentStreamLine(
   }
 
   if (event.type === "delta") {
+    currentComment.text += event.text;
     await sendMessage("comment:stream-chunk", event.text);
     return;
   }
 
   if (event.type === "done") {
     await storage.setItem(previousResponseIdKey, event.responseId);
+    await appendCommentToHistoryInStorage(commentHistoryKey, currentComment);
     return;
   }
 }
@@ -478,4 +504,54 @@ function isCommentStreamEvent(value: unknown): value is CommentStreamEvent {
   }
 
   return false;
+}
+
+async function getCommentHistory(
+  commentHistoryKey: `local:${string}`,
+): Promise<CommentHistoryItem[]> {
+  const commentHistory =
+    (await storage.getItem<CommentHistoryItem[]>(commentHistoryKey)) ?? [];
+  const prunedCommentHistory: CommentHistoryItem[] =
+    pruneExpiredCommentHistory(commentHistory);
+
+  if (prunedCommentHistory.length !== commentHistory.length) {
+    await storage.setItem(commentHistoryKey, prunedCommentHistory);
+  }
+
+  return prunedCommentHistory;
+}
+
+async function setCommentHistory(
+  commentHistoryKey: `local:${string}`,
+  commentHistory: CommentHistoryItem[],
+): Promise<void> {
+  console.trace("setCommentHistory called", {
+    commentHistoryKey,
+    length: commentHistory.length,
+  });
+  await storage.setItem(
+    commentHistoryKey,
+    pruneExpiredCommentHistory(commentHistory),
+  );
+}
+
+async function appendCommentToHistoryInStorage(
+  commentHistoryKey: `local:${string}`,
+  comment: CurrentComment,
+): Promise<void> {
+  const text = comment.text.trim();
+
+  if (text.length === 0) {
+    return;
+  }
+
+  const commentHistory = await getCommentHistory(commentHistoryKey);
+
+  await setCommentHistory(commentHistoryKey, [
+    ...commentHistory,
+    {
+      text: comment.text,
+      createdAt: comment.createdAt,
+    },
+  ]);
 }

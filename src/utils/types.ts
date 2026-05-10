@@ -169,3 +169,13 @@ export type CommentStreamEvent =
       type: "done";
       responseId: string;
     };
+
+export type CommentHistoryItem = {
+  text: string;
+  createdAt: string;
+};
+
+export type CurrentComment = {
+  text: string;
+  createdAt: string;
+};

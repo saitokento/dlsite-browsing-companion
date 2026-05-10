@@ -1,5 +1,10 @@
+import { CommentHistoryItem } from "@/utils/types.ts";
+
 export const AUTO_COMMENT_ENABLED_KEY = "local:autoCommentEnabled";
 export const CHARACTER_ID_KEY = "local:characterId";
+export const COMMENT_HISTORY_RETENTION_DAYS = 30;
+export const COMMENT_HISTORY_RETENTION_MS =
+  COMMENT_HISTORY_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 export const DEBUG_MODE_KEY = "local:debugMode";
 export const ENABLED_HOME_PATHS_KEY = "local:enabledHomePaths";
 
@@ -36,4 +41,20 @@ export async function waitDomReady(timeoutMs: number): Promise<boolean> {
   }
 
   return isDomReady;
+}
+
+export function pruneExpiredCommentHistory(
+  commentHistory: CommentHistoryItem[],
+): CommentHistoryItem[] {
+  const thresholdTime = Date.now() - COMMENT_HISTORY_RETENTION_MS;
+
+  return commentHistory.filter((item) => {
+    const createdAtTime = Date.parse(item.createdAt);
+
+    if (Number.isNaN(createdAtTime)) {
+      return false;
+    }
+
+    return createdAtTime >= thresholdTime;
+  });
 }
