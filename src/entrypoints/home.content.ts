@@ -16,7 +16,7 @@ async function handleHomeTriggered(): Promise<void> {
   const floor: string = homeByPath.get(url.pathname)?.name ?? "";
 
   if (floor !== "") {
-    await waitDomReady(10_000);
+    if (!(await waitDomReady(10_000))) return;
     sendMessage("home:hello", floor).catch((err) => {
       console.error("Failed to send 'home:hello':", err);
     });

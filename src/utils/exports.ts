@@ -26,7 +26,7 @@ export function isCharacterId(value: string): value is CharacterId {
   return (CHARACTER_IDS as readonly string[]).includes(value);
 }
 
-export async function waitDomReady(timeoutMs: number): Promise<void> {
+export async function waitDomReady(timeoutMs: number): Promise<boolean> {
   const isDomReady = await sendMessage("content:wait-dom-ready", {
     timeoutMs,
   });
@@ -34,4 +34,6 @@ export async function waitDomReady(timeoutMs: number): Promise<void> {
   if (!isDomReady) {
     console.warn("DOM was not ready before timeout.");
   }
+
+  return isDomReady;
 }

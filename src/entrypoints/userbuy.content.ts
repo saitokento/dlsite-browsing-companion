@@ -12,7 +12,7 @@ function main(): void {
 
 async function handleUserbuyTriggered(): Promise<void> {
   let userbuyWorkList: UserbuyWork[];
-  await waitDomReady(10_000);
+  if (!(await waitDomReady(10_000))) return;
   try {
     userbuyWorkList = extractWorkList(document);
   } catch (err) {

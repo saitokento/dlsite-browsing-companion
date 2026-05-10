@@ -11,7 +11,7 @@ async function main() {
   const autoCommentEnabled = await loadAutoCommentEnabled();
 
   if (autoCommentEnabled) {
-    await waitDomReady(10_000);
+    if (!(await waitDomReady(10_000))) return;
     commentTriggered();
   }
 }
