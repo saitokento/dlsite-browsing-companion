@@ -438,7 +438,13 @@ async function handleCommentStreamLine(
     return;
   }
 
-  const event: unknown = JSON.parse(trimmedLine);
+  let event: unknown;
+  try {
+    event = JSON.parse(trimmedLine);
+  } catch (err) {
+    console.error("Failed to parse comment stream line:", trimmedLine, err);
+    return;
+  }
 
   if (!isCommentStreamEvent(event)) {
     console.error("Unknown comment stream event:", event);
