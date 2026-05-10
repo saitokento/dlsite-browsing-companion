@@ -165,12 +165,19 @@ async function handleClearSelectedCharacterConversationData(
     return;
   }
 
-  await clearCharacterConversationData(characterId);
-  await sendMessage("options:history-reset");
+  try {
+    await clearCharacterConversationData(characterId);
+    await sendMessage("options:history-reset");
 
-  setConversationClearMessage(
-    `「${characterName}」のコメント履歴をリセットしました。`,
-  );
+    setConversationClearMessage(
+      `「${characterName}」のコメント履歴をリセットしました。`,
+    );
+  } catch (error) {
+    console.error("Failed to reset selected character conversation:", error);
+    setConversationClearMessage(
+      `「${characterName}」のコメント履歴リセットに失敗しました。`,
+    );
+  }
 }
 
 async function handleClearAllCharacterConversationData(
@@ -186,15 +193,24 @@ async function handleClearAllCharacterConversationData(
     return;
   }
 
-  await Promise.all(
-    characters.map((character) => clearCharacterConversationData(character.id)),
-  );
+  try {
+    await Promise.all(
+      characters.map((character) =>
+        clearCharacterConversationData(character.id),
+      ),
+    );
 
-  await sendMessage("options:history-reset");
+    await sendMessage("options:history-reset");
 
-  setConversationClearMessage(
-    "全キャラクターのコメント履歴をリセットしました。",
-  );
+    setConversationClearMessage(
+      "全キャラクターのコメント履歴をリセットしました。",
+    );
+  } catch (error) {
+    console.error("Failed to reset all character conversation data:", error);
+    setConversationClearMessage(
+      "全キャラクターのコメント履歴リセットに失敗しました。",
+    );
+  }
 }
 
 async function handleHomePathChange(
