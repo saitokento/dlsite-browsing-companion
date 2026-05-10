@@ -297,11 +297,18 @@ async function generateComment<U extends Usecase>(
     );
   }
 
+  const previousResponseIdKey: `local:${string}` = `local:xaiPreviousResponseId:${characterId}`;
+
+  const previousResponseId = await storage.getItem<string>(
+    previousResponseIdKey,
+  );
+
   const body = JSON.stringify({
     characterId,
     usecase,
     payload: payload,
     debugMode,
+    ...(previousResponseId ? { previousResponseId } : {}),
   });
 
   if (isStreaming) {
@@ -348,13 +355,13 @@ async function generateComment<U extends Usecase>(
         const line = buffer.slice(0, newlineIndex);
         buffer = buffer.slice(newlineIndex + 1);
 
-        await handleCommentStreamLine(line);
+        await handleCommentStreamLine(line, previousResponseIdKey);
 
         newlineIndex = buffer.indexOf("\n");
       }
 
       if (buffer.trim().length > 0) {
-        await handleCommentStreamLine(buffer);
+        await handleCommentStreamLine(buffer, previousResponseIdKey);
       }
     }
   } catch (err) {
@@ -421,7 +428,10 @@ async function waitForTabComplete(tabId: number): Promise<void> {
   });
 }
 
-async function handleCommentStreamLine(line: string): Promise<void> {
+async function handleCommentStreamLine(
+  line: string,
+  previousResponseIdKey: `local:${string}`,
+): Promise<void> {
   const trimmedLine = line.trim();
 
   if (trimmedLine.length === 0) {
@@ -435,7 +445,15 @@ async function handleCommentStreamLine(line: string): Promise<void> {
     return;
   }
 
-  await sendMessage("comment:stream-chunk", event.text);
+  if (event.type === "delta") {
+    await sendMessage("comment:stream-chunk", event.text);
+    return;
+  }
+
+  if (event.type === "done") {
+    await storage.setItem(previousResponseIdKey, event.responseId);
+    return;
+  }
 }
 
 function isCommentStreamEvent(value: unknown): value is CommentStreamEvent {
@@ -445,5 +463,13 @@ function isCommentStreamEvent(value: unknown): value is CommentStreamEvent {
 
   const event = value as Record<string, unknown>;
 
-  return event.type === "delta" && typeof event.text === "string";
+  if (event.type === "delta") {
+    return typeof event.text === "string";
+  }
+
+  if (event.type === "done") {
+    return typeof event.responseId === "string";
+  }
+
+  return false;
 }

@@ -160,7 +160,12 @@ export const homes: readonly Home[] = [
   new Home("/maniax/tool", "DLsite 制作ソフト・素材フロア（R18）"),
 ];
 
-export type CommentStreamEvent = {
-  type: "delta";
-  text: string;
-};
+export type CommentStreamEvent =
+  | {
+      type: "delta";
+      text: string;
+    }
+  | {
+      type: "done";
+      responseId: string;
+    };
