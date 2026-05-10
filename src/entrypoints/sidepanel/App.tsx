@@ -16,7 +16,9 @@ function App() {
     loadCommentHistory()
       .then((commentHistory) => {
         if (active) {
-          setCommentList(commentHistory);
+          setCommentList((prev) =>
+            prev.length === 0 ? commentHistory : [...commentHistory, ...prev],
+          );
         }
       })
       .catch((err) => {
