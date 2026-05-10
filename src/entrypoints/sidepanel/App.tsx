@@ -108,13 +108,8 @@ async function loadCommentHistory(): Promise<CommentHistoryItem[]> {
 
   const commentHistory =
     (await storage.getItem<CommentHistoryItem[]>(commentHistoryKey)) ?? [];
-  const prunedCommentHistory = pruneExpiredCommentHistory(commentHistory);
 
-  if (prunedCommentHistory.length !== commentHistory.length) {
-    await storage.setItem(commentHistoryKey, prunedCommentHistory);
-  }
-
-  return prunedCommentHistory;
+  return pruneExpiredCommentHistory(commentHistory);
 }
 
 export default App;
