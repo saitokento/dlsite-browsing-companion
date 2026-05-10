@@ -14,6 +14,9 @@ function App() {
     useState<CharacterId>("default");
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
   const [debugMode, setDebugMode] = useState(false);
+  const [conversationClearMessage, setConversationClearMessage] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     loadSelectedCharacter(setSelectedCharacter);
@@ -37,6 +40,35 @@ function App() {
           </option>
         ))}
       </select>
+
+      <h2>コメント履歴のリセット</h2>
+
+      <div className="conversation-data-actions">
+        <button
+          type="button"
+          onClick={() =>
+            handleClearSelectedCharacterConversationData(
+              selectedCharacter,
+              setConversationClearMessage,
+            )
+          }
+        >
+          現在選択中のキャラクターのコメント履歴をリセット
+        </button>
+
+        <button
+          type="button"
+          onClick={() =>
+            handleClearAllCharacterConversationData(setConversationClearMessage)
+          }
+        >
+          全キャラクターの会話履歴のコメント履歴をリセット
+        </button>
+      </div>
+
+      {conversationClearMessage !== null && (
+        <p className="conversation-clear-message">{conversationClearMessage}</p>
+      )}
 
       <h2>ボタンを表示するフロア</h2>
       <div className="home-checkbox-table">
@@ -116,6 +148,71 @@ async function handleCharacterChange(
   await storage.setItem(CHARACTER_ID_KEY, characterId);
 }
 
+async function handleClearSelectedCharacterConversationData(
+  characterId: CharacterId,
+  setConversationClearMessage: (message: string | null) => void,
+): Promise<void> {
+  setConversationClearMessage(null);
+
+  const character = characters.find((item) => item.id === characterId);
+  const characterName = character?.name ?? characterId;
+
+  const accepted = window.confirm(
+    `「${characterName}」のコメント履歴をリセットします。\nよろしいですか？`,
+  );
+
+  if (!accepted) {
+    return;
+  }
+
+  try {
+    await clearCharacterConversationData(characterId);
+    await sendMessage("options:history-reset");
+
+    setConversationClearMessage(
+      `「${characterName}」のコメント履歴をリセットしました。`,
+    );
+  } catch (error) {
+    console.error("Failed to reset selected character conversation:", error);
+    setConversationClearMessage(
+      `「${characterName}」のコメント履歴リセットに失敗しました。`,
+    );
+  }
+}
+
+async function handleClearAllCharacterConversationData(
+  setConversationClearMessage: (message: string | null) => void,
+): Promise<void> {
+  setConversationClearMessage(null);
+
+  const accepted = window.confirm(
+    "全キャラクターのコメント履歴をリセットします。\nよろしいですか？",
+  );
+
+  if (!accepted) {
+    return;
+  }
+
+  try {
+    await Promise.all(
+      characters.map((character) =>
+        clearCharacterConversationData(character.id),
+      ),
+    );
+
+    await sendMessage("options:history-reset");
+
+    setConversationClearMessage(
+      "全キャラクターのコメント履歴をリセットしました。",
+    );
+  } catch (error) {
+    console.error("Failed to reset all character conversation data:", error);
+    setConversationClearMessage(
+      "全キャラクターのコメント履歴リセットに失敗しました。",
+    );
+  }
+}
+
 async function handleHomePathChange(
   event: React.ChangeEvent<HTMLInputElement>,
   homePath: string,
@@ -130,6 +227,15 @@ async function handleHomePathChange(
 
   setEnabledHomePaths(nextEnabledHomePaths);
   await storage.setItem(ENABLED_HOME_PATHS_KEY, nextEnabledHomePaths);
+}
+
+async function clearCharacterConversationData(
+  characterId: CharacterId,
+): Promise<void> {
+  await Promise.all([
+    storage.removeItem(`local:commentHistory:${characterId}`),
+    storage.removeItem(`local:xaiPreviousResponseId:${characterId}`),
+  ]);
 }
 
 async function loadDebugMode(setDebugMode: (debugMode: boolean) => void) {

@@ -13,10 +13,15 @@ function App() {
 
   useEffect(() => {
     let active = true;
+    let historyLoadSeq = 0;
 
+    const nextSeq = () => ++historyLoadSeq;
+    const isLatest = (seq: number) => active && seq === historyLoadSeq;
+
+    const initialSeq = nextSeq();
     loadCommentHistory()
       .then((commentHistory) => {
-        if (active) {
+        if (isLatest(initialSeq)) {
           setCommentList((prev) =>
             prev.length === 0 ? commentHistory : [...commentHistory, ...prev],
           );
@@ -48,10 +53,31 @@ function App() {
       },
     );
 
+    const removeOptionsHistoryResetListener = onMessage(
+      "options:history-reset",
+      async () => {
+        hasStreamEntryRef.current = false;
+        const resetSeq = nextSeq();
+
+        try {
+          const commentHistory = await loadCommentHistory();
+          if (isLatest(resetSeq)) {
+            setCommentList(commentHistory);
+          }
+        } catch (err) {
+          console.error("Failed to reload comment history after reset:", err);
+          if (isLatest(resetSeq)) {
+            setCommentList([]);
+          }
+        }
+      },
+    );
+
     return () => {
       active = false;
       removeStreamStartListener();
       removeStreamChunkListener();
+      removeOptionsHistoryResetListener();
     };
   }, []);
 

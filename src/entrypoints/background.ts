@@ -525,10 +525,6 @@ async function setCommentHistory(
   commentHistoryKey: `local:${string}`,
   commentHistory: CommentHistoryItem[],
 ): Promise<void> {
-  console.trace("setCommentHistory called", {
-    commentHistoryKey,
-    length: commentHistory.length,
-  });
   await storage.setItem(
     commentHistoryKey,
     pruneExpiredCommentHistory(commentHistory),
