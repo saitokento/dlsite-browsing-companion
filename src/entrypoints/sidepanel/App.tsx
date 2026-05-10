@@ -53,8 +53,13 @@ function App() {
       async () => {
         hasStreamEntryRef.current = false;
 
-        const commentHistory = await loadCommentHistory();
-        setCommentList(commentHistory);
+        try {
+          const commentHistory = await loadCommentHistory();
+          setCommentList(commentHistory);
+        } catch (err) {
+          console.error("Failed to reload comment history after reset:", err);
+          setCommentList([]);
+        }
       },
     );
 
