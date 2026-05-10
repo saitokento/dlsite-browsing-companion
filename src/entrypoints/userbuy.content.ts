@@ -1,3 +1,5 @@
+import { waitDomReady } from "@/utils/exports";
+
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/mypage/userbuy*"],
   main,
@@ -5,10 +7,12 @@ export default defineContentScript({
 
 function main(): void {
   onMessage("userbuy:triggered", handleUserbuyTriggered);
+  onMessage("popup:comment-triggered", handleUserbuyTriggered);
 }
 
 async function handleUserbuyTriggered(): Promise<void> {
   let userbuyWorkList: UserbuyWork[];
+  if (!(await waitDomReady(10_000))) return;
   try {
     userbuyWorkList = extractWorkList(document);
   } catch (err) {

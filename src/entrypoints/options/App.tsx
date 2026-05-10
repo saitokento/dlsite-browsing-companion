@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { CharacterId } from "@/utils/types";
-
-export const CHARACTER_ID_KEY = "local:characterId";
-export const ENABLED_HOME_PATHS_KEY = "local:enabledHomePaths";
-export const DEBUG_MODE_KEY = "local:debugMode";
+import {
+  CHARACTER_ID_KEY,
+  DEBUG_MODE_KEY,
+  ENABLED_HOME_PATHS_KEY,
+  loadEnabledHomePaths,
+  isCharacterId,
+} from "@/utils/exports";
 
 function App() {
   const [selectedCharacter, setSelectedCharacter] =
@@ -113,21 +116,6 @@ async function handleCharacterChange(
   await storage.setItem(CHARACTER_ID_KEY, characterId);
 }
 
-export async function loadEnabledHomePaths(
-  setEnabledHomePaths: (enabledHomePaths: string[]) => void,
-) {
-  const savedEnabledHomePaths = await storage.getItem<string[]>(
-    ENABLED_HOME_PATHS_KEY,
-  );
-
-  if (savedEnabledHomePaths !== null) {
-    setEnabledHomePaths(savedEnabledHomePaths);
-    return;
-  }
-
-  setEnabledHomePaths(["/home/", "/soft/", "/garumani/voice"]);
-}
-
 async function handleHomePathChange(
   event: React.ChangeEvent<HTMLInputElement>,
   homePath: string,
@@ -169,10 +157,6 @@ async function handleDebugModeChange(
 
   setDebugMode(checked);
   await storage.setItem(DEBUG_MODE_KEY, checked);
-}
-
-export function isCharacterId(value: string): value is CharacterId {
-  return (CHARACTER_IDS as readonly string[]).includes(value);
 }
 
 export default App;

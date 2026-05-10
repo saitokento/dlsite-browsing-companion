@@ -1,11 +1,23 @@
 import TurndownService from "turndown";
+import { loadAutoCommentEnabled, waitDomReady } from "@/utils/exports";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],
   main,
 });
 
-function main(): void {
+async function main() {
+  onMessage("popup:comment-triggered", commentTriggered);
+
+  const autoCommentEnabled = await loadAutoCommentEnabled();
+
+  if (autoCommentEnabled) {
+    if (!(await waitDomReady(10_000))) return;
+    commentTriggered();
+  }
+}
+
+function commentTriggered(): void {
   let work: Work;
   try {
     work = extractWork(document);
