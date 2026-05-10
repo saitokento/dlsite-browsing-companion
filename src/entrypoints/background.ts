@@ -359,10 +359,10 @@ async function generateComment<U extends Usecase>(
 
         newlineIndex = buffer.indexOf("\n");
       }
+    }
 
-      if (buffer.trim().length > 0) {
-        await handleCommentStreamLine(buffer, previousResponseIdKey);
-      }
+    if (buffer.trim().length > 0) {
+      await handleCommentStreamLine(buffer, previousResponseIdKey);
     }
   } catch (err) {
     if (err instanceof Error) {
