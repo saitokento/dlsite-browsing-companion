@@ -3,7 +3,7 @@ import {
   CHARACTER_ID_KEY,
   DEBUG_MODE_KEY,
   isCharacterId,
-} from "./options/App.tsx";
+} from "@/utils/exports";
 
 const BACKEND_API_KEY = import.meta.env.WXT_BACKEND_API_KEY;
 const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;

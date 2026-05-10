@@ -1,4 +1,4 @@
-import { waitDomReady } from "@/utils/functions.ts";
+import { waitDomReady } from "@/utils/exports";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/mypage/userbuy*"],

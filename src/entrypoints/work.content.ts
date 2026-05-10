@@ -1,6 +1,5 @@
 import TurndownService from "turndown";
-import { loadAutoCommentEnabled } from "./popup/App.tsx";
-import { waitDomReady } from "@/utils/functions.ts";
+import { loadAutoCommentEnabled, waitDomReady } from "@/utils/exports";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/work/=/product_id/*.html"],

@@ -1,5 +1,4 @@
-import { waitDomReady } from "@/utils/functions.ts";
-import { loadAutoCommentEnabled } from "./popup/App.tsx";
+import { loadAutoCommentEnabled, waitDomReady } from "@/utils/exports";
 
 export default defineContentScript({
   matches: ["https://www.dlsite.com/*/download*"],

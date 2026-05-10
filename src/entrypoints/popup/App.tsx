@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { loadEnabledHomePaths } from "../options/App.tsx";
+import {
+  AUTO_COMMENT_ENABLED_KEY,
+  loadAutoCommentEnabled,
+  loadEnabledHomePaths,
+} from "@/utils/exports";
 import "./App.css";
 
-export const AUTO_COMMENT_ENABLED_KEY = "local:autoCommentEnabled";
 const COMMENT_ENABLED_URL_PATTERNS = [
   /^https:\/\/www\.dlsite\.com\/[^/]+\/cart(?:[/?#].*)?$/,
   /^https:\/\/www\.dlsite\.com\/[^/]+\/circle\/profile\/=\/maker_id\/[^/]+\.html(?:[?#].*)?$/,
@@ -81,10 +84,6 @@ function useActiveTab() {
   }, []);
 
   return { activeTab, isDomReady };
-}
-
-export async function loadAutoCommentEnabled(): Promise<boolean> {
-  return (await storage.getItem<boolean>(AUTO_COMMENT_ENABLED_KEY)) ?? true;
 }
 
 export async function saveAutoCommentEnabled(enabled: boolean): Promise<void> {

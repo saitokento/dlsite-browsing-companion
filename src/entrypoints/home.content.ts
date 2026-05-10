@@ -1,4 +1,4 @@
-import { waitDomReady } from "@/utils/functions.ts";
+import { waitDomReady } from "@/utils/exports";
 
 const homeByPath = new Map(homes.map((home) => [home.path, home]));
 
