@@ -169,8 +169,9 @@ async function updateDomReadyState(
   tabId: number | undefined,
   setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
+  setIsActiveTabDomReady(false);
+
   if (tabId === undefined) {
-    setIsActiveTabDomReady(false);
     return;
   }
 
