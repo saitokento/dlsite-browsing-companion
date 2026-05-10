@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CharacterId, CommentHistoryItem } from "@/utils/types.ts";
 import {
   CHARACTER_ID_KEY,
@@ -9,6 +9,7 @@ import "./App.css";
 
 function App() {
   const [commentList, setCommentList] = useState<CommentHistoryItem[]>([]);
+  const hasStreamEntryRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -26,13 +27,24 @@ function App() {
       });
 
     const removeStreamStartListener = onMessage("comment:stream-start", () => {
+      hasStreamEntryRef.current = true;
       setCommentList(startNewComment);
     });
 
     const removeStreamChunkListener = onMessage(
       "comment:stream-chunk",
       (message) => {
-        setCommentList((prev) => appendChunkToLastComment(prev, message.data));
+        setCommentList((prev) => {
+          const [next, created] = appendChunkToLastComment(
+            prev,
+            message.data,
+            hasStreamEntryRef.current,
+          );
+          if (created) {
+            hasStreamEntryRef.current = true;
+          }
+          return next;
+        });
       },
     );
 
@@ -71,10 +83,12 @@ function startNewComment(prev: CommentHistoryItem[]): CommentHistoryItem[] {
 function appendChunkToLastComment(
   prev: CommentHistoryItem[],
   chunk: string,
-): CommentHistoryItem[] {
+  hasStreamEntry: boolean,
+): [CommentHistoryItem[], boolean] {
   const updated = [...prev];
+  let created = false;
 
-  if (updated.length === 0) {
+  if (!hasStreamEntry) {
     console.warn(
       "'comment:stream-chunk' received before 'comment:stream-start'.",
     );
@@ -83,6 +97,7 @@ function appendChunkToLastComment(
       text: "",
       createdAt: new Date().toISOString(),
     });
+    created = true;
   }
 
   const lastIndex = updated.length - 1;
@@ -93,7 +108,7 @@ function appendChunkToLastComment(
     text: lastItem.text + chunk,
   };
 
-  return updated;
+  return [updated, created];
 }
 
 async function loadCommentHistory(): Promise<CommentHistoryItem[]> {
