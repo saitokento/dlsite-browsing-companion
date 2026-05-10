@@ -152,6 +152,8 @@ async function handleClearSelectedCharacterConversationData(
   characterId: CharacterId,
   setConversationClearMessage: (message: string | null) => void,
 ): Promise<void> {
+  setConversationClearMessage(null);
+
   const character = characters.find((item) => item.id === characterId);
   const characterName = character?.name ?? characterId;
 
@@ -174,6 +176,8 @@ async function handleClearSelectedCharacterConversationData(
 async function handleClearAllCharacterConversationData(
   setConversationClearMessage: (message: string | null) => void,
 ): Promise<void> {
+  setConversationClearMessage(null);
+
   const accepted = window.confirm(
     "全キャラクターのコメント履歴をリセットします。\nよろしいですか？",
   );
