@@ -159,3 +159,8 @@ export const homes: readonly Home[] = [
   new Home("/home/tool", "DLsite 制作ソフト・素材フロア（全年齢）"),
   new Home("/maniax/tool", "DLsite 制作ソフト・素材フロア（R18）"),
 ];
+
+export type CommentStreamEvent = {
+  type: "delta";
+  text: string;
+};

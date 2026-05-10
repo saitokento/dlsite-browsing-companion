@@ -1,4 +1,4 @@
-import { CharacterId } from "@/utils/types.ts";
+import { CharacterId, CommentStreamEvent } from "@/utils/types.ts";
 import {
   CHARACTER_ID_KEY,
   DEBUG_MODE_KEY,
@@ -338,8 +338,24 @@ async function generateComment<U extends Usecase>(
 
     await sendMessage("comment:stream-start");
 
+    let buffer = "";
+
     for await (const chunk of stream) {
-      await sendMessage("comment:stream-chunk", chunk);
+      buffer += chunk;
+
+      let newlineIndex = buffer.indexOf("\n");
+      while (newlineIndex !== -1) {
+        const line = buffer.slice(0, newlineIndex);
+        buffer = buffer.slice(newlineIndex + 1);
+
+        await handleCommentStreamLine(line);
+
+        newlineIndex = buffer.indexOf("\n");
+      }
+
+      if (buffer.trim().length > 0) {
+        await handleCommentStreamLine(buffer);
+      }
     }
   } catch (err) {
     if (err instanceof Error) {
@@ -403,4 +419,31 @@ async function waitForTabComplete(tabId: number): Promise<void> {
         reject(err);
       });
   });
+}
+
+async function handleCommentStreamLine(line: string): Promise<void> {
+  const trimmedLine = line.trim();
+
+  if (trimmedLine.length === 0) {
+    return;
+  }
+
+  const event: unknown = JSON.parse(trimmedLine);
+
+  if (!isCommentStreamEvent(event)) {
+    console.error("Unknown comment stream event:", event);
+    return;
+  }
+
+  await sendMessage("comment:stream-chunk", event.text);
+}
+
+function isCommentStreamEvent(value: unknown): value is CommentStreamEvent {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const event = value as Record<string, unknown>;
+
+  return event.type === "delta" && typeof event.text === "string";
 }
