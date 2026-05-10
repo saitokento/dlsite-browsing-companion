@@ -48,10 +48,21 @@ function App() {
       },
     );
 
+    const removeOptionsHistoryResetListener = onMessage(
+      "options:history-reset",
+      async () => {
+        hasStreamEntryRef.current = false;
+
+        const commentHistory = await loadCommentHistory();
+        setCommentList(commentHistory);
+      },
+    );
+
     return () => {
       active = false;
       removeStreamStartListener();
       removeStreamChunkListener();
+      removeOptionsHistoryResetListener();
     };
   }, []);
 

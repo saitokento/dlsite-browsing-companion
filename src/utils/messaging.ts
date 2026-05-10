@@ -3,6 +3,7 @@ import { defineExtensionMessaging } from "@webext-core/messaging";
 export interface ProtocolMap {
   "popup:comment-triggered": () => void;
   "popup:wait-dom-ready"(data: { tabId: number; timeoutMs?: number }): boolean;
+  "options:history-reset": () => void;
   "content:wait-dom-ready"(data: { timeoutMs?: number }): boolean;
   "work:extracted": (data: Work) => void;
   "home:open": (data: Home) => void;
