@@ -118,10 +118,20 @@ function setupActiveTabWatcher(
   >,
   setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
-  void updateActiveTabState(setActiveTab, setIsActiveTabDomReady);
+  let domReadyCheckSeq = 0;
+  const refreshDomReadyState = (tabId: number | undefined) => {
+    const checkSeq = ++domReadyCheckSeq;
+    return updateDomReadyState(
+      tabId,
+      setIsActiveTabDomReady,
+      () => checkSeq === domReadyCheckSeq,
+    );
+  };
+
+  void updateActiveTabState(setActiveTab, refreshDomReadyState);
 
   const handleActivated = () => {
-    void updateActiveTabState(setActiveTab, setIsActiveTabDomReady);
+    void updateActiveTabState(setActiveTab, refreshDomReadyState);
   };
 
   const handleUpdated = (
@@ -136,7 +146,7 @@ function setupActiveTabWatcher(
     setActiveTab(tab);
 
     if (changeInfo.status || changeInfo.url) {
-      void updateDomReadyState(tab.id, setIsActiveTabDomReady);
+      void refreshDomReadyState(tab.id);
     }
   };
 
@@ -153,7 +163,7 @@ async function updateActiveTabState(
   setActiveTab: React.Dispatch<
     React.SetStateAction<Browser.tabs.Tab | undefined>
   >,
-  setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
+  refreshDomReadyState: (tabId: number | undefined) => Promise<void>,
 ) {
   const [tab] = await browser.tabs.query({
     active: true,
@@ -161,12 +171,13 @@ async function updateActiveTabState(
   });
 
   setActiveTab(tab);
-  await updateDomReadyState(tab?.id, setIsActiveTabDomReady);
+  await refreshDomReadyState(tab?.id);
 }
 
 async function updateDomReadyState(
   tabId: number | undefined,
   setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
+  isLatest: () => boolean,
 ) {
   setIsActiveTabDomReady(false);
 
@@ -180,10 +191,14 @@ async function updateDomReadyState(
       timeoutMs: 10_000,
     });
 
-    setIsActiveTabDomReady(isDomReady);
+    if (isLatest()) {
+      setIsActiveTabDomReady(isDomReady);
+    }
   } catch (err) {
     console.error("Failed to check DOM ready state:", err);
-    setIsActiveTabDomReady(false);
+    if (isLatest()) {
+      setIsActiveTabDomReady(false);
+    }
   }
 }
 
