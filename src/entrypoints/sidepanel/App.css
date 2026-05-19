@@ -1,0 +1,10 @@
+.comment-list {
+  font-size: 13px;
+  line-height: 1.6;
+
+  padding: 5px 10px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+}
