@@ -103,7 +103,14 @@ export type PayloadByUsecase = {
 
 export type Usecase = keyof PayloadByUsecase;
 
-export const CHARACTER_IDS = ["default", "dela"] as const;
+export const CHARACTER_IDS = [
+  "default",
+  "dela",
+  "athena",
+  "nyansak",
+  "nijiyomechan",
+  "saotome",
+] as const;
 
 export type CharacterId = (typeof CHARACTER_IDS)[number];
 
@@ -120,6 +127,10 @@ export class Character {
 export const characters: readonly Character[] = [
   new Character("default", "デフォルト"),
   new Character("dela", "でらちゃん"),
+  new Character("athena", "アテナちゃん"),
+  new Character("nyansak", "ニャン作"),
+  new Character("nijiyomechan", "にじよめちゃん"),
+  new Character("saotome", "早乙女"),
 ];
 
 export class Home {
