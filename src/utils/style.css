@@ -24,10 +24,21 @@ a:hover {
 }
 
 body {
+  color: #333;
+  font-family:
+    Helvetica Neue,
+    Hiragino Sans,
+    Hiragino Kaku Gothic ProN,
+    Meiryo,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  padding: 0;
   margin: 0;
-  display: flex;
-  min-width: 320px;
-  min-height: 100vh;
+  background-color: #fff;
+  -webkit-text-size-adjust: 100%;
+  overflow-wrap: break-word;
 }
 
 h1 {
