@@ -146,6 +146,8 @@ async function handleCharacterChange(
 
   setSelectedCharacter(characterId);
   await storage.setItem(CHARACTER_ID_KEY, characterId);
+
+  await sendMessage("options:history-reset");
 }
 
 async function handleClearSelectedCharacterConversationData(
