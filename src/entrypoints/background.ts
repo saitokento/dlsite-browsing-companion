@@ -6,7 +6,6 @@ import {
 } from "@/utils/types.ts";
 import {
   CHARACTER_ID_KEY,
-  DEBUG_MODE_KEY,
   isCharacterId,
   pruneExpiredCommentHistory,
 } from "@/utils/exports";
@@ -17,7 +16,6 @@ const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 let isStreaming = false;
 
 let characterId: CharacterId = "default";
-let debugMode: boolean = false;
 
 export default defineBackground(main);
 
@@ -294,7 +292,6 @@ async function generateComment<U extends Usecase>(
 ): Promise<void> {
   characterId =
     (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
-  debugMode = (await storage.getItem<boolean>(DEBUG_MODE_KEY)) ?? false;
 
   if (!isCharacterId(characterId)) {
     characterId = "default";
@@ -314,7 +311,6 @@ async function generateComment<U extends Usecase>(
     characterId,
     usecase,
     payload: payload,
-    debugMode,
     ...(previousResponseId ? { previousResponseId } : {}),
   });
 
