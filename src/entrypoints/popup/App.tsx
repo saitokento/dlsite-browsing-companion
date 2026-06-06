@@ -6,6 +6,12 @@ import {
 } from "@/utils/exports";
 import "./App.css";
 
+type FirefoxBrowser = typeof browser & {
+  sidebarAction?: {
+    open(): Promise<void>;
+  };
+};
+
 const COMMENT_ENABLED_URL_PATTERNS = [
   /^https:\/\/www\.dlsite\.com\/[^/]+\/cart(?:[/?#].*)?$/,
   /^https:\/\/www\.dlsite\.com\/[^/]+\/circle\/profile\/=\/maker_id\/[^/]+\.html(?:[?#].*)?$/,
@@ -232,6 +238,13 @@ async function handleUserbuyTriggerClick() {
 
 async function openSidePanel() {
   try {
+    const browserSidebarAction = (browser as FirefoxBrowser).sidebarAction;
+
+    if (browserSidebarAction?.open) {
+      await browserSidebarAction.open();
+      return;
+    }
+
     const win = await browser.windows.getCurrent();
 
     if (win.id === undefined) {

@@ -9,7 +9,7 @@ export default defineConfig({
   manifest: {
     name: "DLsite Browsing Companion",
     description: "",
-    permissions: ["sidePanel", "storage", "scripting"],
+    permissions: ["storage", "scripting"],
     host_permissions: ["https://www.dlsite.com/*"],
     side_panel: {
       default_path: "sidepanel.html",
