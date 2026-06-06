@@ -20,6 +20,9 @@ let characterId: CharacterId = "default";
 const pendingHomeTabIds = new Set<number>();
 const readyHomeTabIds = new Set<number>();
 
+const pendingUserbuyTabIds = new Set<number>();
+const readyUserbuyTabIds = new Set<number>();
+
 export default defineBackground(main);
 
 function main(): void {
@@ -37,6 +40,7 @@ function main(): void {
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
   onMessage("userbuy:open", handleUserbuyOpen);
+  onMessage("userbuy:ready", handleUserbuyReady);
   onMessage("userbuy:extracted", handleUserbuyExtracted);
   onMessage("cart:list", handleCartList);
   onMessage("download:list", handleDownloadList);
@@ -44,6 +48,15 @@ function main(): void {
   browser.tabs.onRemoved.addListener((tabId) => {
     pendingHomeTabIds.delete(tabId);
     readyHomeTabIds.delete(tabId);
+    pendingUserbuyTabIds.delete(tabId);
+    readyUserbuyTabIds.delete(tabId);
+  });
+
+  browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.status === "loading") {
+      pendingUserbuyTabIds.delete(tabId);
+      readyUserbuyTabIds.delete(tabId);
+    }
   });
 }
 
@@ -120,13 +133,27 @@ async function handleCircleNew(message: {
 
 async function handleUserbuyOpen(): Promise<void> {
   const targetTabId: number | undefined = await openUserbuy();
-  if (targetTabId !== undefined) {
-    await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
-      (err) => {
-        console.error("Failed to send 'userbuy:triggered':", err);
-      },
-    );
+  if (targetTabId === undefined) {
+    return;
   }
+
+  pendingUserbuyTabIds.add(targetTabId);
+  await triggerUserbuyIfReady(targetTabId);
+}
+
+async function handleUserbuyReady({
+  sender,
+}: {
+  sender: Browser.runtime.MessageSender;
+}): Promise<void> {
+  const tabId = sender.tab?.id;
+
+  if (tabId === undefined) {
+    return;
+  }
+
+  readyUserbuyTabIds.add(tabId);
+  await triggerUserbuyIfReady(tabId);
 }
 
 async function handleUserbuyExtracted(message: {
@@ -307,9 +334,21 @@ async function openUserbuy(): Promise<number | undefined> {
     return;
   }
 
-  await waitForTabComplete(targetTabId);
-
   return targetTabId;
+}
+
+async function triggerUserbuyIfReady(tabId: number): Promise<void> {
+  if (!pendingUserbuyTabIds.has(tabId) || !readyUserbuyTabIds.has(tabId)) {
+    return;
+  }
+
+  pendingUserbuyTabIds.delete(tabId);
+
+  try {
+    await sendMessage("userbuy:triggered", undefined, tabId);
+  } catch (err) {
+    console.error("Failed to send 'userbuy:triggered':", err);
+  }
 }
 
 async function generateComment<U extends Usecase>(

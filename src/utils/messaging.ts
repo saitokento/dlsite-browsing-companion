@@ -11,6 +11,7 @@ export interface ProtocolMap {
   "home:hello": (data: string) => void;
   "circle:new": (data: CircleNewPayload) => void;
   "userbuy:open": () => void;
+  "userbuy:ready"(): void;
   "userbuy:triggered": () => void;
   "userbuy:extracted": (data: UserbuyWork[]) => void;
   "cart:list": (data: CartListPayload) => void;
