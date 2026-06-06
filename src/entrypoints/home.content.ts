@@ -9,16 +9,25 @@ export default defineContentScript({
 
 function main(): void {
   onMessage("home:triggered", handleHomeTriggered);
+
+  sendMessage("home:ready").catch((err) => {
+    console.error("Failed to send 'home:ready':", err);
+  });
 }
 
 async function handleHomeTriggered(): Promise<void> {
   const url = new URL(window.location.href);
   const floor: string = homeByPath.get(url.pathname)?.name ?? "";
 
-  if (floor !== "") {
-    if (!(await waitDomReady(10_000))) return;
-    sendMessage("home:hello", floor).catch((err) => {
-      console.error("Failed to send 'home:hello':", err);
-    });
+  if (floor === "") {
+    return;
   }
+
+  if (!(await waitDomReady(10_000))) {
+    return;
+  }
+
+  await sendMessage("home:hello", floor).catch((err) => {
+    console.error("Failed to send 'home:hello':", err);
+  });
 }

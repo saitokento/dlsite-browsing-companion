@@ -17,6 +17,9 @@ let isStreaming = false;
 
 let characterId: CharacterId = "default";
 
+const pendingHomeTabIds = new Set<number>();
+const readyHomeTabIds = new Set<number>();
+
 export default defineBackground(main);
 
 function main(): void {
@@ -30,12 +33,18 @@ function main(): void {
   onMessage("content:wait-dom-ready", handleContentWaitDomReady);
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:open", handleHomeOpen);
+  onMessage("home:ready", handleHomeReady);
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
   onMessage("userbuy:open", handleUserbuyOpen);
   onMessage("userbuy:extracted", handleUserbuyExtracted);
   onMessage("cart:list", handleCartList);
   onMessage("download:list", handleDownloadList);
+
+  browser.tabs.onRemoved.addListener((tabId) => {
+    pendingHomeTabIds.delete(tabId);
+    readyHomeTabIds.delete(tabId);
+  });
 }
 
 async function handleContentWaitDomReady({
@@ -64,13 +73,29 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
 }
 
 async function handleHomeOpen(message: { data: Home }): Promise<void> {
-  const home: Home = message.data;
-  const targetTabId: number | undefined = await openDLsite(home);
-  if (targetTabId !== undefined) {
-    await sendMessage("home:triggered", undefined, targetTabId).catch((err) => {
-      console.error("Failed to send 'triggered':", err);
-    });
+  const targetTabId = await openDLsite(message.data);
+
+  if (targetTabId === undefined) {
+    return;
   }
+
+  pendingHomeTabIds.add(targetTabId);
+  await triggerHomeIfReady(targetTabId);
+}
+
+async function handleHomeReady({
+  sender,
+}: {
+  sender: Browser.runtime.MessageSender;
+}): Promise<void> {
+  const tabId = sender.tab?.id;
+
+  if (tabId === undefined) {
+    return;
+  }
+
+  readyHomeTabIds.add(tabId);
+  await triggerHomeIfReady(tabId);
 }
 
 async function handleHomeHello(message: { data: string }): Promise<void> {
@@ -217,9 +242,22 @@ async function openDLsite(home: Home): Promise<number | undefined> {
     return;
   }
 
-  await waitForTabComplete(targetTabId);
-
   return targetTabId;
+}
+
+async function triggerHomeIfReady(tabId: number): Promise<void> {
+  if (!pendingHomeTabIds.has(tabId) || !readyHomeTabIds.has(tabId)) {
+    return;
+  }
+
+  pendingHomeTabIds.delete(tabId);
+  readyHomeTabIds.delete(tabId);
+
+  try {
+    await sendMessage("home:triggered", undefined, tabId);
+  } catch (err) {
+    console.error("Failed to send 'home:triggered':", err);
+  }
 }
 
 async function openUserbuy(): Promise<number | undefined> {

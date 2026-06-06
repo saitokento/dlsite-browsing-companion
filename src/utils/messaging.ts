@@ -6,6 +6,7 @@ export interface ProtocolMap {
   "content:wait-dom-ready"(data: { timeoutMs?: number }): boolean;
   "work:extracted": (data: Work) => void;
   "home:open": (data: Home) => void;
+  "home:ready"(): void;
   "home:triggered": () => void;
   "home:hello": (data: string) => void;
   "circle:new": (data: CircleNewPayload) => void;
