@@ -1,4 +1,9 @@
 .comment-list {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
   font-size: 13px;
   line-height: 1.6;
 
