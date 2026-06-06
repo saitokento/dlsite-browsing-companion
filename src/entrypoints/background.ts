@@ -27,7 +27,6 @@ function main(): void {
     throw new Error("Missing required environment variable: BACKEND_URL");
   }
 
-  onMessage("popup:wait-dom-ready", handlePopupWaitDomReady);
   onMessage("content:wait-dom-ready", handleContentWaitDomReady);
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:open", handleHomeOpen);
@@ -37,17 +36,6 @@ function main(): void {
   onMessage("userbuy:extracted", handleUserbuyExtracted);
   onMessage("cart:list", handleCartList);
   onMessage("download:list", handleDownloadList);
-}
-
-async function handlePopupWaitDomReady({
-  data,
-}: {
-  data: {
-    tabId: number;
-    timeoutMs?: number;
-  };
-}): Promise<boolean> {
-  return waitUntilDomReady(data.tabId, data.timeoutMs);
 }
 
 async function handleContentWaitDomReady({
