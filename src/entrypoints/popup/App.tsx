@@ -143,7 +143,7 @@ function setupActiveTabWatcher(
     tab: Browser.tabs.Tab,
   ) => {
     if (tab.active) {
-      setActiveTab(tab);
+      void updateActiveTab();
     }
   };
 
