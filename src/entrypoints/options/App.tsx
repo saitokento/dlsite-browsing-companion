@@ -120,14 +120,11 @@ async function handleCharacterChange(
   event: React.ChangeEvent<HTMLSelectElement>,
   setSelectedCharacter: (characterId: CharacterId) => void,
 ) {
-  let characterId: CharacterId;
-
   const value = event.target.value;
   if (!isCharacterId(value)) {
-    characterId = "default";
     console.error("Selected CharacterID is invaild. Falling back to 'default'");
   }
-  characterId = value as CharacterId;
+  const characterId: CharacterId = isCharacterId(value) ? value : "default";
 
   setSelectedCharacter(characterId);
   await storage.setItem(CHARACTER_ID_KEY, characterId);
