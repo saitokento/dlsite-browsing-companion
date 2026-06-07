@@ -1,5 +1,6 @@
 import { waitDomReady } from "@/utils/exports";
 
+/** URLからフロア情報を取得するための対応表 */
 const homeByPath = new Map(homes.map((home) => [home.path, home]));
 
 export default defineContentScript({
@@ -15,6 +16,7 @@ function main(): void {
   });
 }
 
+/** 現在のフロア名を特定し、挨拶コメント生成用のメッセージを送信する */
 async function handleHomeTriggered(): Promise<void> {
   const url = new URL(window.location.href);
   const floor: string = homeByPath.get(url.pathname)?.name ?? "";

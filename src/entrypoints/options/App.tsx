@@ -98,6 +98,10 @@ function App() {
   );
 }
 
+/**
+ * storageに保存されたキャラクター設定を読み込む
+ * @param setSelectedCharacter 選択中のキャラクターを更新する関数
+ */
 async function loadSelectedCharacter(
   setSelectedCharacter: (characterId: CharacterId) => void,
 ) {
@@ -116,6 +120,11 @@ async function loadSelectedCharacter(
   }
 }
 
+/**
+ * 選択されたキャラクターを保存し、コメント履歴を再読み込みする
+ * @param event セレクト要素の変更イベント
+ * @param setSelectedCharacter 選択中のキャラクターを更新する関数
+ */
 async function handleCharacterChange(
   event: React.ChangeEvent<HTMLSelectElement>,
   setSelectedCharacter: (characterId: CharacterId) => void,
@@ -132,6 +141,11 @@ async function handleCharacterChange(
   await sendMessage("options:history-reset");
 }
 
+/**
+ * 選択中のキャラクターのコメント履歴をリセットし、コメント履歴を再読み込みする
+ * @param characterId 対象キャラクターのID
+ * @param setConversationClearMessage 処理結果メッセージを更新する関数
+ */
 async function handleClearSelectedCharacterConversationData(
   characterId: CharacterId,
   setConversationClearMessage: (message: string | null) => void,
@@ -164,6 +178,10 @@ async function handleClearSelectedCharacterConversationData(
   }
 }
 
+/**
+ * 全キャラクターのコメント履歴をリセットし、コメント履歴を再読み込みする
+ * @param setConversationClearMessage 処理結果メッセージを更新する関数
+ */
 async function handleClearAllCharacterConversationData(
   setConversationClearMessage: (message: string | null) => void,
 ): Promise<void> {
@@ -197,6 +215,13 @@ async function handleClearAllCharacterConversationData(
   }
 }
 
+/**
+ * Popupにボタンを表示するフロアを変更し、storageに保存する
+ * @param event チェックボックスの変更イベント
+ * @param homePath 対象フロアのパス
+ * @param enabledHomePaths 現在有効なフロアのパス一覧
+ * @param setEnabledHomePaths 有効なフロアのパス一覧を更新する関数
+ */
 async function handleHomePathChange(
   event: React.ChangeEvent<HTMLInputElement>,
   homePath: string,
@@ -213,6 +238,10 @@ async function handleHomePathChange(
   await storage.setItem(ENABLED_HOME_PATHS_KEY, nextEnabledHomePaths);
 }
 
+/**
+ * 指定キャラクターのコメント履歴をリセットする
+ * @param characterId 対象キャラクターのID
+ */
 async function clearCharacterConversationData(
   characterId: CharacterId,
 ): Promise<void> {

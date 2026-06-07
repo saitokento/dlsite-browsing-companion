@@ -16,6 +16,7 @@ async function main() {
   }
 }
 
+/** 現在のサークルページから情報を抽出し、Backgroundへ送信する */
 function commentTriggered(): void {
   let circleNewPayload: CircleNewPayload;
   try {
@@ -29,6 +30,11 @@ function commentTriggered(): void {
   });
 }
 
+/**
+ * サークルページからメーカー名、予告作品一覧、販売作品一覧を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns コメント生成用のサークル情報
+ */
 function extractCircle(doc: Document): CircleNewPayload {
   const makerName =
     doc.querySelector<HTMLElement>(".prof_maker_name")?.textContent ?? "";
@@ -38,6 +44,11 @@ function extractCircle(doc: Document): CircleNewPayload {
   return { makerName, circleAnnounceWorkList, circleWorkList };
 }
 
+/**
+ * サークルページから予告作品一覧を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 予告作品の一覧
+ */
 function extractAnnounceWorkList(doc: Document): CircleAnnounceWork[] {
   return Array.from(
     doc.querySelectorAll<HTMLTableRowElement>(".prof_ana_work tr"),
@@ -60,6 +71,11 @@ function extractAnnounceWorkList(doc: Document): CircleAnnounceWork[] {
   });
 }
 
+/**
+ * 予告作品の要素から商品IDを抽出する
+ * @param item 対象の予告作品の要素
+ * @returns 商品ID。取得できない場合は空文字列
+ */
 function extractAnnounceProductId(item: HTMLElement): string {
   return (
     item.querySelector<HTMLElement>("[data-product_id]")?.dataset.product_id ??
@@ -67,6 +83,11 @@ function extractAnnounceProductId(item: HTMLElement): string {
   );
 }
 
+/**
+ * 予告作品要素からクリエイター（シナリオ、イラスト、声優など）名を抽出する
+ * @param item 対象の予告作品の要素
+ * @returns クリエイター名。表示がない場合は`null`
+ */
 function extractAnnounceAuthor(item: HTMLElement): string | null {
   const authorElement = item.querySelector<HTMLElement>(".author");
 
@@ -75,10 +96,20 @@ function extractAnnounceAuthor(item: HTMLElement): string | null {
     : null;
 }
 
+/**
+ * 予告作品要素から販売予定日を抽出する
+ * @param item 対象の予告作品の要素
+ * @returns 販売予定日。取得できない場合は空文字列
+ */
 function extractExpectedDate(item: HTMLElement): string {
   return item.querySelector(".expected_date")?.textContent?.trim() ?? "";
 }
 
+/**
+ * 予告作品の無料サンプルの有無を判定する
+ * @param item 対象の予告作品の要素
+ * @returns 無料サンプルがある場合は`true`
+ */
 function extractFreeSample(item: HTMLElement): boolean {
   const freeSampleButton = item.querySelector<HTMLElement>(".btn_free_sample");
 
@@ -89,6 +120,11 @@ function extractFreeSample(item: HTMLElement): boolean {
   return !freeSampleButton.classList.contains("disabled");
 }
 
+/**
+ * サークルページから販売中の作品一覧を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 販売中の作品一覧
+ */
 function extractWorkList(doc: Document): CircleWork[] {
   const items = Array.from(
     doc.querySelectorAll<HTMLLIElement>(
@@ -120,6 +156,11 @@ function extractWorkList(doc: Document): CircleWork[] {
   });
 }
 
+/**
+ * 作品要素からクリエイター（シナリオ、イラスト、声優など）名を抽出する
+ * @param item 対象の作品の要素。
+ * @returns クリエイター名。表示がない場合は`null`
+ */
 function extractAuthor(item: HTMLElement): string | null {
   const authorElement = item.querySelector(".author");
   return authorElement
@@ -127,6 +168,11 @@ function extractAuthor(item: HTMLElement): string | null {
     : null;
 }
 
+/**
+ * 作品要素から割引後価格を抽出する
+ * @param item 対象の作品の要素
+ * @returns 割引後価格。取得できない場合は空文字列
+ */
 function extractPrice(item: HTMLElement): string {
   return (
     item.querySelector<HTMLElement>("[data-price]")?.dataset.price ??
@@ -137,6 +183,11 @@ function extractPrice(item: HTMLElement): string {
   );
 }
 
+/**
+ * 作品要素から割引前価格を抽出する
+ * @param item 対象の作品要素
+ * @returns 割引前価格。取得できない場合は空文字列
+ */
 function extractOfficialPrice(item: HTMLElement): string {
   return (
     item.querySelector<HTMLElement>("[data-official_price]")?.dataset
@@ -148,6 +199,11 @@ function extractOfficialPrice(item: HTMLElement): string {
   );
 }
 
+/**
+ * 価格の接頭辞と接尾辞を返す（現在は円のみを返す）
+ * @param _item 対象の作品要素（現在は使用してない）
+ * @returns 接頭辞と接尾辞の配列（現在は["", "円"]）
+ */
 function extractPriceAffixes(_item: HTMLElement): string[] {
   // const prefix = item.querySelector(".work_price_prefix")?.textContent ?? "";
   // const suffix = item.querySelector(".work_price_suffix")?.textContent ?? "";
@@ -156,6 +212,11 @@ function extractPriceAffixes(_item: HTMLElement): string[] {
   return ["", "円"];
 }
 
+/**
+ * 作品要素からラベル（割引率等）一覧を抽出する
+ * @param item 対象の作品要素
+ * @returns ラベル文字列の一覧
+ */
 function extractLabels(item: HTMLElement): string[] {
   return Array.from(
     item.querySelectorAll<HTMLElement>(".work_deals.work_labels > *"),

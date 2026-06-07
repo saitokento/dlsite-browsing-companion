@@ -103,6 +103,11 @@ function App() {
   );
 }
 
+/**
+ * コメントリストの末尾に新しいコメント項目を追加する
+ * @param prev 現在のコメントリスト
+ * @returns 新しいコメント項目を追加したコメントリスト
+ */
 function startNewComment(prev: CommentHistoryItem[]): CommentHistoryItem[] {
   if (prev.length < 1 || prev[prev.length - 1].text !== "") {
     return [
@@ -117,6 +122,13 @@ function startNewComment(prev: CommentHistoryItem[]): CommentHistoryItem[] {
   return prev;
 }
 
+/**
+ * 受信したストリームのチャンクをコメントリストの最後のコメント項目へ追加する
+ * @param prev 現在のコメントリスト
+ * @param chunk 追加するチャンク
+ * @param hasStreamEntry ストリーム用のコメント項目がすでに存在するかどうか
+ * @returns 更新後のコメントリストと、新規コメント項目を作成したかどうか
+ */
 function appendChunkToLastComment(
   prev: CommentHistoryItem[],
   chunk: string,
@@ -148,6 +160,10 @@ function appendChunkToLastComment(
   return [updated, created];
 }
 
+/**
+ * 選択中のキャラクターのコメント履歴をstorageから読み込む
+ * @returns 選択中のキャラクターのコメント履歴
+ */
 async function loadCommentHistory(): Promise<CommentHistoryItem[]> {
   let characterId =
     (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";

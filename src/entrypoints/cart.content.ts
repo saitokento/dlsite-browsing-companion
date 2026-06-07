@@ -16,6 +16,7 @@ async function main() {
   }
 }
 
+/** カートページから情報を抽出し、Backgroundへ送信する */
 function commentTriggered(): void {
   let cartListPayload: CartListPayload;
 
@@ -31,6 +32,11 @@ function commentTriggered(): void {
   });
 }
 
+/**
+ * カート内作品一覧、割引情報、クーポン情報を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns コメント生成用のカート情報
+ */
 function extractCart(doc: Document): CartListPayload {
   const cartWorkList = extractWorkList(doc);
   const [totalDiscount, pricePrefix, priceSuffix] = extractTotalDiscount(doc);
@@ -49,6 +55,11 @@ function extractCart(doc: Document): CartListPayload {
   };
 }
 
+/**
+ * カート内の作品一覧を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns カート内作品の一覧
+ */
 function extractWorkList(doc: Document): CartWork[] {
   const items = Array.from(
     doc.querySelectorAll<HTMLLIElement>(
@@ -78,6 +89,11 @@ function extractWorkList(doc: Document): CartWork[] {
   });
 }
 
+/**
+ * 割引後合計金額と通貨単位を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 合計金額、通貨接頭辞、通貨接尾辞の配列
+ */
 function extractTotalDiscount(doc: Document): string[] {
   const totalDiscount =
     doc
@@ -92,6 +108,11 @@ function extractTotalDiscount(doc: Document): string[] {
   return [totalDiscount, "", "円"];
 }
 
+/**
+ * 割引前の合計金額を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 割引前合計。表示がない場合は`null`
+ */
 function extractTotalOriginal(doc: Document): string | null {
   const totalOriginal = doc
     .querySelector(".total_original .work_price_base")
@@ -103,6 +124,11 @@ function extractTotalOriginal(doc: Document): string | null {
   return totalOriginal;
 }
 
+/**
+ * 使用可能なクーポン名を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns クーポン名。表示がない場合は`null`
+ */
 function extractCouponName(doc: Document): string | null {
   const couponName = doc.querySelector(
     ".coupon_available_inner .coupon_name",
@@ -113,6 +139,11 @@ function extractCouponName(doc: Document): string | null {
   return couponName;
 }
 
+/**
+ * クーポン適用後の合計金額を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns クーポン適用後合計。表示がない場合は`null`
+ */
 function extractTotalCoupon(doc: Document): string | null {
   const totalCoupon = doc
     .querySelector(".coupon_available_inner .work_price_base")
