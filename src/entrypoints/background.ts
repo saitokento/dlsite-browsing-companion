@@ -471,47 +471,6 @@ function isUserbuyUrl(url: URL): boolean {
   }
 }
 
-async function waitForTabComplete(tabId: number): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      browser.tabs.onUpdated.removeListener(listener);
-      reject(new Error("Timed out waiting for tab to complete loading."));
-    }, 30_000);
-
-    const listener: Parameters<typeof browser.tabs.onUpdated.addListener>[0] = (
-      updatedTabId: number,
-      changeInfo: Browser.tabs.OnUpdatedInfo,
-    ) => {
-      if (updatedTabId !== tabId) {
-        return;
-      }
-
-      if (changeInfo.status === "complete") {
-        clearTimeout(timeoutId);
-        browser.tabs.onUpdated.removeListener(listener);
-        resolve();
-      }
-    };
-
-    browser.tabs.onUpdated.addListener(listener);
-
-    browser.tabs
-      .get(tabId)
-      .then((tab) => {
-        if (tab.status === "complete") {
-          clearTimeout(timeoutId);
-          browser.tabs.onUpdated.removeListener(listener);
-          resolve();
-        }
-      })
-      .catch((err) => {
-        clearTimeout(timeoutId);
-        browser.tabs.onUpdated.removeListener(listener);
-        reject(err);
-      });
-  });
-}
-
 async function handleCommentStreamLine(
   line: string,
   previousResponseIdKey: `local:${string}`,
