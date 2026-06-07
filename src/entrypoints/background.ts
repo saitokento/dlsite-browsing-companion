@@ -343,6 +343,7 @@ async function triggerUserbuyIfReady(tabId: number): Promise<void> {
   }
 
   pendingUserbuyTabIds.delete(tabId);
+  readyUserbuyTabIds.delete(tabId);
 
   try {
     await sendMessage("userbuy:triggered", undefined, tabId);
