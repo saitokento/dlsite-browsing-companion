@@ -125,7 +125,7 @@ function appendChunkToLastComment(
   const updated = [...prev];
   let created = false;
 
-  if (!hasStreamEntry) {
+  if (!hasStreamEntry || updated.length === 0) {
     console.warn(
       "'comment:stream-chunk' received before 'comment:stream-start'.",
     );
