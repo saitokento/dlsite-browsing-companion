@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@webext-core/messaging": "^3.0.2",
-    "react": "^19.2.4",
+    "react": "^19.2.7",
     "react-dom": "^19.2.4",
     "turndown": "^7.2.4"
   },
@@ -27,7 +27,7 @@
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
     "@eslint/js": "^9.39.4",
-    "@types/react": "^19.2.13",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.1.9",
     "@types/turndown": "^5.0.6",
     "@wxt-dev/auto-icons": "^1.1.1",
