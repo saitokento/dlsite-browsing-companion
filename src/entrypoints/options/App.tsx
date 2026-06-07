@@ -3,7 +3,6 @@ import "./App.css";
 import { CharacterId } from "@/utils/types";
 import {
   CHARACTER_ID_KEY,
-  DEBUG_MODE_KEY,
   ENABLED_HOME_PATHS_KEY,
   loadEnabledHomePaths,
   isCharacterId,
@@ -13,7 +12,6 @@ function App() {
   const [selectedCharacter, setSelectedCharacter] =
     useState<CharacterId>("default");
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
-  const [debugMode, setDebugMode] = useState(false);
   const [conversationClearMessage, setConversationClearMessage] = useState<
     string | null
   >(null);
@@ -21,7 +19,6 @@ function App() {
   useEffect(() => {
     loadSelectedCharacter(setSelectedCharacter);
     loadEnabledHomePaths(setEnabledHomePaths);
-    loadDebugMode(setDebugMode);
   }, []);
 
   return (
@@ -97,18 +94,6 @@ function App() {
           </label>
         ))}
       </div>
-
-      <details>
-        <summary>開発者用</summary>
-        <label>
-          <input
-            type="checkbox"
-            checked={debugMode}
-            onChange={(event) => handleDebugModeChange(event, setDebugMode)}
-          />
-          デバッグモードを有効にする
-        </label>
-      </details>
     </>
   );
 }
@@ -135,17 +120,16 @@ async function handleCharacterChange(
   event: React.ChangeEvent<HTMLSelectElement>,
   setSelectedCharacter: (characterId: CharacterId) => void,
 ) {
-  let characterId: CharacterId;
-
   const value = event.target.value;
   if (!isCharacterId(value)) {
-    characterId = "default";
     console.error("Selected CharacterID is invaild. Falling back to 'default'");
   }
-  characterId = value as CharacterId;
+  const characterId: CharacterId = isCharacterId(value) ? value : "default";
 
   setSelectedCharacter(characterId);
   await storage.setItem(CHARACTER_ID_KEY, characterId);
+
+  await sendMessage("options:history-reset");
 }
 
 async function handleClearSelectedCharacterConversationData(
@@ -236,33 +220,6 @@ async function clearCharacterConversationData(
     storage.removeItem(`local:commentHistory:${characterId}`),
     storage.removeItem(`local:xaiPreviousResponseId:${characterId}`),
   ]);
-}
-
-async function loadDebugMode(setDebugMode: (debugMode: boolean) => void) {
-  const savedDebugMode = await storage.getItem<boolean>(DEBUG_MODE_KEY);
-
-  setDebugMode(savedDebugMode ?? false);
-}
-
-async function handleDebugModeChange(
-  event: React.ChangeEvent<HTMLInputElement>,
-  setDebugMode: (debugMode: boolean) => void,
-) {
-  const checked = event.target.checked;
-
-  if (checked) {
-    const accepted = window.confirm(
-      "デバッグモードを有効にすると、バックエンドサーバー上にプロンプトが出力されるようになり、その内容は開発者が確認することがあります。\nプロンプトには、DLsiteの閲覧履歴、購入履歴、カートの内容などの情報が含まれることがあります。\nよろしいですか？",
-    );
-
-    if (!accepted) {
-      setDebugMode(false);
-      return;
-    }
-  }
-
-  setDebugMode(checked);
-  await storage.setItem(DEBUG_MODE_KEY, checked);
 }
 
 export default App;

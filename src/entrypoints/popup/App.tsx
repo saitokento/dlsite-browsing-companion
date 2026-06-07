@@ -6,6 +6,12 @@ import {
 } from "@/utils/exports";
 import "./App.css";
 
+type FirefoxBrowser = typeof browser & {
+  sidebarAction?: {
+    open(): Promise<void>;
+  };
+};
+
 const COMMENT_ENABLED_URL_PATTERNS = [
   /^https:\/\/www\.dlsite\.com\/[^/]+\/cart(?:[/?#].*)?$/,
   /^https:\/\/www\.dlsite\.com\/[^/]+\/circle\/profile\/=\/maker_id\/[^/]+\.html(?:[?#].*)?$/,
@@ -17,7 +23,7 @@ const COMMENT_ENABLED_URL_PATTERNS = [
 function App() {
   const [enabledHomePaths, setEnabledHomePaths] = useState<string[]>([]);
   const [autoCommentEnabled, setAutoCommentEnabled] = useState(true);
-  const { activeTab, isDomReady } = useActiveTab();
+  const { activeTab } = useActiveTab();
 
   useEffect(() => {
     loadEnabledHomePaths(setEnabledHomePaths);
@@ -25,7 +31,7 @@ function App() {
   }, []);
 
   const isCommentButtonDisabled =
-    !isCommentEnabledUrl(activeTab?.url) || !isDomReady;
+    !isCommentEnabledUrl(activeTab?.url) || activeTab?.status !== "complete";
 
   async function handleAutoCommentChange(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -77,13 +83,12 @@ function App() {
 
 function useActiveTab() {
   const [activeTab, setActiveTab] = useState<Browser.tabs.Tab | undefined>();
-  const [isDomReady, setIsDomReady] = useState(false);
 
   useEffect(() => {
-    return setupActiveTabWatcher(setActiveTab, setIsDomReady);
+    return setupActiveTabWatcher(setActiveTab);
   }, []);
 
-  return { activeTab, isDomReady };
+  return { activeTab };
 }
 
 export async function saveAutoCommentEnabled(enabled: boolean): Promise<void> {
@@ -116,37 +121,29 @@ function setupActiveTabWatcher(
   setActiveTab: React.Dispatch<
     React.SetStateAction<Browser.tabs.Tab | undefined>
   >,
-  setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
-  let domReadyCheckSeq = 0;
-  const refreshDomReadyState = (tabId: number | undefined) => {
-    const checkSeq = ++domReadyCheckSeq;
-    return updateDomReadyState(
-      tabId,
-      setIsActiveTabDomReady,
-      () => checkSeq === domReadyCheckSeq,
-    );
+  const updateActiveTab = async () => {
+    const [tab] = await browser.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
+    });
+
+    setActiveTab(tab);
   };
 
-  void updateActiveTabState(setActiveTab, refreshDomReadyState);
+  void updateActiveTab();
 
   const handleActivated = () => {
-    void updateActiveTabState(setActiveTab, refreshDomReadyState);
+    void updateActiveTab();
   };
 
   const handleUpdated = (
-    tabId: number,
-    changeInfo: Browser.tabs.OnUpdatedInfo,
+    _tabId: number,
+    _changeInfo: Browser.tabs.OnUpdatedInfo,
     tab: Browser.tabs.Tab,
   ) => {
-    if (!tab.active) {
-      return;
-    }
-
-    setActiveTab(tab);
-
-    if (changeInfo.status || changeInfo.url) {
-      void refreshDomReadyState(tab.id);
+    if (tab.active) {
+      void updateActiveTab();
     }
   };
 
@@ -157,49 +154,6 @@ function setupActiveTabWatcher(
     browser.tabs.onActivated.removeListener(handleActivated);
     browser.tabs.onUpdated.removeListener(handleUpdated);
   };
-}
-
-async function updateActiveTabState(
-  setActiveTab: React.Dispatch<
-    React.SetStateAction<Browser.tabs.Tab | undefined>
-  >,
-  refreshDomReadyState: (tabId: number | undefined) => Promise<void>,
-) {
-  const [tab] = await browser.tabs.query({
-    active: true,
-    lastFocusedWindow: true,
-  });
-
-  setActiveTab(tab);
-  await refreshDomReadyState(tab?.id);
-}
-
-async function updateDomReadyState(
-  tabId: number | undefined,
-  setIsActiveTabDomReady: React.Dispatch<React.SetStateAction<boolean>>,
-  isLatest: () => boolean,
-) {
-  setIsActiveTabDomReady(false);
-
-  if (tabId === undefined) {
-    return;
-  }
-
-  try {
-    const isDomReady = await sendMessage("popup:wait-dom-ready", {
-      tabId,
-      timeoutMs: 10_000,
-    });
-
-    if (isLatest()) {
-      setIsActiveTabDomReady(isDomReady);
-    }
-  } catch (err) {
-    console.error("Failed to check DOM ready state:", err);
-    if (isLatest()) {
-      setIsActiveTabDomReady(false);
-    }
-  }
 }
 
 function isCommentEnabledUrl(url?: string): boolean {
@@ -232,6 +186,13 @@ async function handleUserbuyTriggerClick() {
 
 async function openSidePanel() {
   try {
+    const browserSidebarAction = (browser as FirefoxBrowser).sidebarAction;
+
+    if (browserSidebarAction?.open) {
+      await browserSidebarAction.open();
+      return;
+    }
+
     const win = await browser.windows.getCurrent();
 
     if (win.id === undefined) {

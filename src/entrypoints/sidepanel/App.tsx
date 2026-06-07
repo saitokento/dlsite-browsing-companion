@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { CharacterId, CommentHistoryItem } from "@/utils/types.ts";
 import {
   CHARACTER_ID_KEY,
@@ -10,6 +10,17 @@ import "./App.css";
 function App() {
   const [commentList, setCommentList] = useState<CommentHistoryItem[]>([]);
   const hasStreamEntryRef = useRef(false);
+  const commentListRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const commentListElement = commentListRef.current;
+
+    if (!commentListElement) {
+      return;
+    }
+
+    commentListElement.scrollTop = commentListElement.scrollHeight;
+  }, [commentList]);
 
   useEffect(() => {
     let active = true;
@@ -82,7 +93,7 @@ function App() {
   }, []);
 
   return (
-    <div className="comment-list">
+    <div ref={commentListRef} className="comment-list">
       {commentList.map((item, index) => (
         <div key={`${item.createdAt}-${index}`} className="comment-item">
           <p className="comment-text">{item.text}</p>
@@ -114,7 +125,7 @@ function appendChunkToLastComment(
   const updated = [...prev];
   let created = false;
 
-  if (!hasStreamEntry) {
+  if (!hasStreamEntry || updated.length === 0) {
     console.warn(
       "'comment:stream-chunk' received before 'comment:stream-start'.",
     );

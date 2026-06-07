@@ -8,6 +8,10 @@ export default defineContentScript({
 function main(): void {
   onMessage("userbuy:triggered", handleUserbuyTriggered);
   onMessage("popup:comment-triggered", handleUserbuyTriggered);
+
+  sendMessage("userbuy:ready", undefined).catch((err) => {
+    console.error("Failed to send 'userbuy:ready':", err);
+  });
 }
 
 async function handleUserbuyTriggered(): Promise<void> {
@@ -19,7 +23,7 @@ async function handleUserbuyTriggered(): Promise<void> {
     console.error("Failed to extract work list:", err);
     return;
   }
-  sendMessage("userbuy:extracted", userbuyWorkList).catch((err) => {
+  await sendMessage("userbuy:extracted", userbuyWorkList).catch((err) => {
     console.error("Failed to send 'userbuy:extracted':", err);
   });
 }

@@ -2,15 +2,16 @@ import { defineExtensionMessaging } from "@webext-core/messaging";
 
 export interface ProtocolMap {
   "popup:comment-triggered": () => void;
-  "popup:wait-dom-ready"(data: { tabId: number; timeoutMs?: number }): boolean;
   "options:history-reset": () => void;
   "content:wait-dom-ready"(data: { timeoutMs?: number }): boolean;
   "work:extracted": (data: Work) => void;
   "home:open": (data: Home) => void;
+  "home:ready"(): void;
   "home:triggered": () => void;
   "home:hello": (data: string) => void;
   "circle:new": (data: CircleNewPayload) => void;
   "userbuy:open": () => void;
+  "userbuy:ready"(): void;
   "userbuy:triggered": () => void;
   "userbuy:extracted": (data: UserbuyWork[]) => void;
   "cart:list": (data: CartListPayload) => void;

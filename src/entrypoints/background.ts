@@ -6,7 +6,6 @@ import {
 } from "@/utils/types.ts";
 import {
   CHARACTER_ID_KEY,
-  DEBUG_MODE_KEY,
   isCharacterId,
   pruneExpiredCommentHistory,
 } from "@/utils/exports";
@@ -17,7 +16,12 @@ const BACKEND_URL = import.meta.env.WXT_BACKEND_URL;
 let isStreaming = false;
 
 let characterId: CharacterId = "default";
-let debugMode: boolean = false;
+
+const pendingHomeTabIds = new Set<number>();
+const readyHomeTabIds = new Set<number>();
+
+const pendingUserbuyTabIds = new Set<number>();
+const readyUserbuyTabIds = new Set<number>();
 
 export default defineBackground(main);
 
@@ -29,27 +33,31 @@ function main(): void {
     throw new Error("Missing required environment variable: BACKEND_URL");
   }
 
-  onMessage("popup:wait-dom-ready", handlePopupWaitDomReady);
   onMessage("content:wait-dom-ready", handleContentWaitDomReady);
   onMessage("work:extracted", handleWorkExtracted);
   onMessage("home:open", handleHomeOpen);
+  onMessage("home:ready", handleHomeReady);
   onMessage("home:hello", handleHomeHello);
   onMessage("circle:new", handleCircleNew);
   onMessage("userbuy:open", handleUserbuyOpen);
+  onMessage("userbuy:ready", handleUserbuyReady);
   onMessage("userbuy:extracted", handleUserbuyExtracted);
   onMessage("cart:list", handleCartList);
   onMessage("download:list", handleDownloadList);
-}
 
-async function handlePopupWaitDomReady({
-  data,
-}: {
-  data: {
-    tabId: number;
-    timeoutMs?: number;
-  };
-}): Promise<boolean> {
-  return waitUntilDomReady(data.tabId, data.timeoutMs);
+  browser.tabs.onRemoved.addListener((tabId) => {
+    pendingHomeTabIds.delete(tabId);
+    readyHomeTabIds.delete(tabId);
+    pendingUserbuyTabIds.delete(tabId);
+    readyUserbuyTabIds.delete(tabId);
+  });
+
+  browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
+    if (changeInfo.status === "loading") {
+      pendingUserbuyTabIds.delete(tabId);
+      readyUserbuyTabIds.delete(tabId);
+    }
+  });
 }
 
 async function handleContentWaitDomReady({
@@ -78,13 +86,29 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
 }
 
 async function handleHomeOpen(message: { data: Home }): Promise<void> {
-  const home: Home = message.data;
-  const targetTabId: number | undefined = await openDLsite(home);
-  if (targetTabId !== undefined) {
-    await sendMessage("home:triggered", undefined, targetTabId).catch((err) => {
-      console.error("Failed to send 'triggered':", err);
-    });
+  const targetTabId = await openDLsite(message.data);
+
+  if (targetTabId === undefined) {
+    return;
   }
+
+  pendingHomeTabIds.add(targetTabId);
+  await triggerHomeIfReady(targetTabId);
+}
+
+async function handleHomeReady({
+  sender,
+}: {
+  sender: Browser.runtime.MessageSender;
+}): Promise<void> {
+  const tabId = sender.tab?.id;
+
+  if (tabId === undefined) {
+    return;
+  }
+
+  readyHomeTabIds.add(tabId);
+  await triggerHomeIfReady(tabId);
 }
 
 async function handleHomeHello(message: { data: string }): Promise<void> {
@@ -109,13 +133,27 @@ async function handleCircleNew(message: {
 
 async function handleUserbuyOpen(): Promise<void> {
   const targetTabId: number | undefined = await openUserbuy();
-  if (targetTabId !== undefined) {
-    await sendMessage("userbuy:triggered", undefined, targetTabId).catch(
-      (err) => {
-        console.error("Failed to send 'userbuy:triggered':", err);
-      },
-    );
+  if (targetTabId === undefined) {
+    return;
   }
+
+  pendingUserbuyTabIds.add(targetTabId);
+  await triggerUserbuyIfReady(targetTabId);
+}
+
+async function handleUserbuyReady({
+  sender,
+}: {
+  sender: Browser.runtime.MessageSender;
+}): Promise<void> {
+  const tabId = sender.tab?.id;
+
+  if (tabId === undefined) {
+    return;
+  }
+
+  readyUserbuyTabIds.add(tabId);
+  await triggerUserbuyIfReady(tabId);
 }
 
 async function handleUserbuyExtracted(message: {
@@ -231,9 +269,22 @@ async function openDLsite(home: Home): Promise<number | undefined> {
     return;
   }
 
-  await waitForTabComplete(targetTabId);
-
   return targetTabId;
+}
+
+async function triggerHomeIfReady(tabId: number): Promise<void> {
+  if (!pendingHomeTabIds.has(tabId) || !readyHomeTabIds.has(tabId)) {
+    return;
+  }
+
+  pendingHomeTabIds.delete(tabId);
+  readyHomeTabIds.delete(tabId);
+
+  try {
+    await sendMessage("home:triggered", undefined, tabId);
+  } catch (err) {
+    console.error("Failed to send 'home:triggered':", err);
+  }
 }
 
 async function openUserbuy(): Promise<number | undefined> {
@@ -283,9 +334,22 @@ async function openUserbuy(): Promise<number | undefined> {
     return;
   }
 
-  await waitForTabComplete(targetTabId);
-
   return targetTabId;
+}
+
+async function triggerUserbuyIfReady(tabId: number): Promise<void> {
+  if (!pendingUserbuyTabIds.has(tabId) || !readyUserbuyTabIds.has(tabId)) {
+    return;
+  }
+
+  pendingUserbuyTabIds.delete(tabId);
+  readyUserbuyTabIds.delete(tabId);
+
+  try {
+    await sendMessage("userbuy:triggered", undefined, tabId);
+  } catch (err) {
+    console.error("Failed to send 'userbuy:triggered':", err);
+  }
 }
 
 async function generateComment<U extends Usecase>(
@@ -294,7 +358,6 @@ async function generateComment<U extends Usecase>(
 ): Promise<void> {
   characterId =
     (await storage.getItem<CharacterId>(CHARACTER_ID_KEY)) ?? "default";
-  debugMode = (await storage.getItem<boolean>(DEBUG_MODE_KEY)) ?? false;
 
   if (!isCharacterId(characterId)) {
     characterId = "default";
@@ -314,7 +377,6 @@ async function generateComment<U extends Usecase>(
     characterId,
     usecase,
     payload: payload,
-    debugMode,
     ...(previousResponseId ? { previousResponseId } : {}),
   });
 
