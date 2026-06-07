@@ -26,10 +26,7 @@ a:hover {
 body {
   color: #333;
   font-family:
-    Helvetica Neue,
-    Hiragino Sans,
-    Hiragino Kaku Gothic ProN,
-    Meiryo,
+    "Helvetica Neue", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Meiryo",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
