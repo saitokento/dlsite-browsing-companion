@@ -54,7 +54,6 @@ function main(): void {
 
   browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (changeInfo.status === "loading") {
-      pendingUserbuyTabIds.delete(tabId);
       readyUserbuyTabIds.delete(tabId);
     }
   });

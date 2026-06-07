@@ -181,7 +181,7 @@ function isCommentEnabledUrl(url?: string): boolean {
 }
 
 /**
- * 指定フロアを開くを送り、サイドパネルが開いていない場合は開く
+ * 指定フロアを開く要求を送り、サイドパネルが開いていない場合は開く
  * @param home 開くフロア
  */
 async function handleOpenDLsiteClick(home: Home) {
