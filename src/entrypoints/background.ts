@@ -60,6 +60,12 @@ function main(): void {
   });
 }
 
+/**
+ * Content Scriptからの要求を受け、送信元タブのDOMの準備完了を待機する
+ * @param data 待機タイムアウト（ミリ秒）を持つdata
+ * @param sender メッセージ送信元の情報
+ * @returns DOMが準備完了した場合は`true`、それ以外は`false`
+ */
 async function handleContentWaitDomReady({
   data,
   sender,
@@ -76,6 +82,10 @@ async function handleContentWaitDomReady({
   return waitUntilDomReady(tabId, data.timeoutMs);
 }
 
+/**
+ * 作品ページの情報を使ってコメント生成を開始する
+ * @param message 抽出済みの作品情報を持つメッセージ
+ */
 async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   const work: Work = message.data;
   try {
@@ -85,6 +95,10 @@ async function handleWorkExtracted(message: { data: Work }): Promise<void> {
   }
 }
 
+/**
+ * 指定されたフロアを開き、Content Scriptの準備完了後に処理を開始する
+ * @param message 開くフロア情報を持つメッセージ
+ */
 async function handleHomeOpen(message: { data: Home }): Promise<void> {
   const targetTabId = await openDLsite(message.data);
 
@@ -96,6 +110,10 @@ async function handleHomeOpen(message: { data: Home }): Promise<void> {
   await triggerHomeIfReady(targetTabId);
 }
 
+/**
+ * トップページのContent Scriptの準備完了を記録
+ * @param sender メッセージ送信元の情報
+ */
 async function handleHomeReady({
   sender,
 }: {
@@ -111,6 +129,10 @@ async function handleHomeReady({
   await triggerHomeIfReady(tabId);
 }
 
+/**
+ * フロア名を使って挨拶コメントを生成する
+ * @param message フロア名を持つメッセージ
+ */
 async function handleHomeHello(message: { data: string }): Promise<void> {
   const floor: string = message.data;
   try {
@@ -120,6 +142,10 @@ async function handleHomeHello(message: { data: string }): Promise<void> {
   }
 }
 
+/**
+ * サークルページから抽出された情報を使ってコメントを生成する
+ * @param message サークルページの情報を持つメッセージ
+ */
 async function handleCircleNew(message: {
   data: CircleNewPayload;
 }): Promise<void> {
@@ -131,6 +157,7 @@ async function handleCircleNew(message: {
   }
 }
 
+/** 購入履歴ページを開き、Content Scriptの準備完了後に抽出処理を開始する */
 async function handleUserbuyOpen(): Promise<void> {
   const targetTabId: number | undefined = await openUserbuy();
   if (targetTabId === undefined) {
@@ -141,6 +168,10 @@ async function handleUserbuyOpen(): Promise<void> {
   await triggerUserbuyIfReady(targetTabId);
 }
 
+/**
+ * 購入履歴のContent Scriptの準備完了を記録する
+ * @param sender メッセージ送信元の情報
+ */
 async function handleUserbuyReady({
   sender,
 }: {
@@ -156,6 +187,10 @@ async function handleUserbuyReady({
   await triggerUserbuyIfReady(tabId);
 }
 
+/**
+ * 購入履歴から抽出された作品一覧の情報を使ってコメントを生成する
+ * @param message 購入履歴の作品一覧を持つメッセージ
+ */
 async function handleUserbuyExtracted(message: {
   data: UserbuyWork[];
 }): Promise<void> {
@@ -167,6 +202,10 @@ async function handleUserbuyExtracted(message: {
   }
 }
 
+/**
+ * カートから抽出された情報を使ってコメントを生成する
+ * @param message カート内の作品一覧と合計金額を持つメッセージ
+ */
 async function handleCartList(message: {
   data: CartListPayload;
 }): Promise<void> {
@@ -178,6 +217,10 @@ async function handleCartList(message: {
   }
 }
 
+/**
+ * 購入後ページの情報を使ってコメントを生成する
+ * @param message 購入後ページの購入作品一覧を持つメッセージ
+ */
 async function handleDownloadList(message: {
   data: DownloadListPayload;
 }): Promise<void> {
@@ -189,6 +232,12 @@ async function handleDownloadList(message: {
   }
 }
 
+/**
+ * 指定タブのDOMContentLoadedを待機する
+ * @param tabId 対象タブのID
+ * @param timeoutMs 待機する最大時間（ミリ秒）
+ * @returns DOM が準備完了した場合は`true`、タイムアウトまたは失敗時は`false`
+ */
 async function waitUntilDomReady(
   tabId: number,
   timeoutMs = 10_000,
@@ -227,6 +276,11 @@ async function waitUntilDomReady(
   }
 }
 
+/**
+ * 指定されたフロアを現在のタブまたは新しいタブで開く
+ * @param home 開くフロアの情報
+ * @returns 対象タブのID。タブを取得できない場合は`undefined`
+ */
 async function openDLsite(home: Home): Promise<number | undefined> {
   const [activeTab] = await browser.tabs.query({
     active: true,
@@ -272,6 +326,10 @@ async function openDLsite(home: Home): Promise<number | undefined> {
   return targetTabId;
 }
 
+/**
+ * ホームタブが要求済みかつ準備完了の場合に、抽出開始メッセージを送信する
+ * @param tabId 対象タブのID
+ */
 async function triggerHomeIfReady(tabId: number): Promise<void> {
   if (!pendingHomeTabIds.has(tabId) || !readyHomeTabIds.has(tabId)) {
     return;
@@ -287,6 +345,10 @@ async function triggerHomeIfReady(tabId: number): Promise<void> {
   }
 }
 
+/**
+ * 購入履歴ページを現在のタブまたは新しいタブで開く
+ * @returns 対象タブのID。タブを取得できない場合は`undefined`
+ */
 async function openUserbuy(): Promise<number | undefined> {
   const [activeTab] = await browser.tabs.query({
     active: true,
@@ -337,6 +399,10 @@ async function openUserbuy(): Promise<number | undefined> {
   return targetTabId;
 }
 
+/**
+ * 購入履歴タブが要求済みかつ準備完了の場合に、抽出開始メッセージを送信する
+ * @param tabId 対象タブのID
+ */
 async function triggerUserbuyIfReady(tabId: number): Promise<void> {
   if (!pendingUserbuyTabIds.has(tabId) || !readyUserbuyTabIds.has(tabId)) {
     return;
@@ -352,6 +418,11 @@ async function triggerUserbuyIfReady(tabId: number): Promise<void> {
   }
 }
 
+/**
+ * 指定usecaseのデータをバックエンドへ送信し、ストリーミングされたコメントを処理する
+ * @param usecase コメント生成のusecase
+ * @param payload usecaseごとの入力データ
+ */
 async function generateComment<U extends Usecase>(
   usecase: U,
   payload: PayloadByUsecase[U],
@@ -459,6 +530,11 @@ async function generateComment<U extends Usecase>(
   }
 }
 
+/**
+ * URLがDLsiteの購入履歴ページか判定する
+ * @param url 判定対象のURL
+ * @returns 購入履歴ページの場合は`true`
+ */
 function isUserbuyUrl(url: URL): boolean {
   try {
     return (
@@ -471,47 +547,13 @@ function isUserbuyUrl(url: URL): boolean {
   }
 }
 
-async function waitForTabComplete(tabId: number): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      browser.tabs.onUpdated.removeListener(listener);
-      reject(new Error("Timed out waiting for tab to complete loading."));
-    }, 30_000);
-
-    const listener: Parameters<typeof browser.tabs.onUpdated.addListener>[0] = (
-      updatedTabId: number,
-      changeInfo: Browser.tabs.OnUpdatedInfo,
-    ) => {
-      if (updatedTabId !== tabId) {
-        return;
-      }
-
-      if (changeInfo.status === "complete") {
-        clearTimeout(timeoutId);
-        browser.tabs.onUpdated.removeListener(listener);
-        resolve();
-      }
-    };
-
-    browser.tabs.onUpdated.addListener(listener);
-
-    browser.tabs
-      .get(tabId)
-      .then((tab) => {
-        if (tab.status === "complete") {
-          clearTimeout(timeoutId);
-          browser.tabs.onUpdated.removeListener(listener);
-          resolve();
-        }
-      })
-      .catch((err) => {
-        clearTimeout(timeoutId);
-        browser.tabs.onUpdated.removeListener(listener);
-        reject(err);
-      });
-  });
-}
-
+/**
+ * コメントストリームの1行を解析し、チャンクの処理または完了処理を実行する
+ * @param line JSON Lines形式の1行
+ * @param previousResponseIdKey 前回レスポンスIDの保存キー
+ * @param commentHistoryKey コメント履歴の保存キー
+ * @param currentComment 現在生成中のコメント
+ */
 async function handleCommentStreamLine(
   line: string,
   previousResponseIdKey: `local:${string}`,
@@ -550,6 +592,11 @@ async function handleCommentStreamLine(
   }
 }
 
+/**
+ * 値が有効なコメントストリームイベントか判定する
+ * @param value 判定対象の値
+ * @returns `delta`または`done`イベントとして有効な場合は`true`
+ */
 function isCommentStreamEvent(value: unknown): value is CommentStreamEvent {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -568,6 +615,11 @@ function isCommentStreamEvent(value: unknown): value is CommentStreamEvent {
   return false;
 }
 
+/**
+ * storage内のコメント履歴を取得し、保持期限を過ぎた項目を削除する
+ * @param commentHistoryKey コメント履歴の保存キー
+ * @returns 有効期限内のコメント履歴
+ */
 async function getCommentHistory(
   commentHistoryKey: `local:${string}`,
 ): Promise<CommentHistoryItem[]> {
@@ -583,6 +635,11 @@ async function getCommentHistory(
   return prunedCommentHistory;
 }
 
+/**
+ * コメント履歴から期限切れ項目を削除して保存する
+ * @param commentHistoryKey コメント履歴の保存キー
+ * @param commentHistory 保存するコメント履歴
+ */
 async function setCommentHistory(
   commentHistoryKey: `local:${string}`,
   commentHistory: CommentHistoryItem[],
@@ -593,6 +650,11 @@ async function setCommentHistory(
   );
 }
 
+/**
+ * 生成済みコメントを既存の履歴へ追加して保存する
+ * @param commentHistoryKey コメント履歴の保存キー
+ * @param comment 追加するコメント
+ */
 async function appendCommentToHistoryInStorage(
   commentHistoryKey: `local:${string}`,
   comment: CurrentComment,

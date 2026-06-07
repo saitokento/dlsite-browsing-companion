@@ -12,6 +12,7 @@ type FirefoxBrowser = typeof browser & {
   };
 };
 
+/** コメント生成対応ページのURLパターン一覧 */
 const COMMENT_ENABLED_URL_PATTERNS = [
   /^https:\/\/www\.dlsite\.com\/[^/]+\/cart(?:[/?#].*)?$/,
   /^https:\/\/www\.dlsite\.com\/[^/]+\/circle\/profile\/=\/maker_id\/[^/]+\.html(?:[?#].*)?$/,
@@ -91,10 +92,15 @@ function useActiveTab() {
   return { activeTab };
 }
 
+/**
+ * 自動コメント機能の有効状態をストレージへ保存する
+ * @param enabled 自動コメントを有効にする場合は`true`
+ */
 export async function saveAutoCommentEnabled(enabled: boolean): Promise<void> {
   await storage.setItem(AUTO_COMMENT_ENABLED_KEY, enabled);
 }
 
+/** 現在のタブへコメント生成要求を送り、サイドパネルが開いていない場合は開く */
 async function handleCommentTriggerClick() {
   const sidePanelPromise = openSidePanel().catch(console.error);
 
@@ -117,6 +123,11 @@ async function handleCommentTriggerClick() {
   await sidePanelPromise;
 }
 
+/**
+ * タブの切り替えや更新を監視し、アクティブタブ情報を更新する
+ * @param setActiveTab アクティブタブを更新するReactのsetter
+ * @returns 登録したイベントリスナーを解除する関数
+ */
 function setupActiveTabWatcher(
   setActiveTab: React.Dispatch<
     React.SetStateAction<Browser.tabs.Tab | undefined>
@@ -156,6 +167,11 @@ function setupActiveTabWatcher(
   };
 }
 
+/**
+ * 指定URLがコメント生成対象ページか判定する
+ * @param url 判定対象のURL
+ * @returns 対象ページの場合は`true`
+ */
 function isCommentEnabledUrl(url?: string): boolean {
   if (!url) {
     return false;
@@ -164,6 +180,10 @@ function isCommentEnabledUrl(url?: string): boolean {
   return COMMENT_ENABLED_URL_PATTERNS.some((pattern) => pattern.test(url));
 }
 
+/**
+ * 指定フロアを開くを送り、サイドパネルが開いていない場合は開く
+ * @param home 開くフロア
+ */
 async function handleOpenDLsiteClick(home: Home) {
   const sidePanelPromise = openSidePanel().catch(console.error);
 
@@ -174,6 +194,7 @@ async function handleOpenDLsiteClick(home: Home) {
   await sidePanelPromise;
 }
 
+/** 購入履歴ページを開く要求を送り、サイドパネルが開いていない場合は開く */
 async function handleUserbuyTriggerClick() {
   const sidePanelPromise = openSidePanel().catch(console.error);
 
@@ -184,6 +205,7 @@ async function handleUserbuyTriggerClick() {
   await sidePanelPromise;
 }
 
+/** ブラウザのサイドパネルを開く */
 async function openSidePanel() {
   try {
     const browserSidebarAction = (browser as FirefoxBrowser).sidebarAction;

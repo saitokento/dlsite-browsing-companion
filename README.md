@@ -23,6 +23,8 @@ DLsiteの閲覧中にAIキャラクターがコメントをしてくれるブラ
 5. 拡張機能のアイコンをクリックしてポップアップを開き、開きたいDLsiteのフロアのボタンをクリック
 6. サイドパネルとDLsiteのトップページが開き、対応するページを開くとAIキャラクターがコメントをしてくれます
 
+キャラクターやポップアップにボタンが表示されるフロア等は、拡張機能のアイコンを右クリックして「オプション」を開くことで設定可能です。
+
 ## 開発背景
 
 - DLsiteで作品を探す・購入する体験そのものをエンタテインメント化したい
@@ -42,14 +44,14 @@ DLsiteの閲覧中にAIキャラクターがコメントをしてくれるブラ
 
 ### 対応ページ
 
-| ページ                   | 抽出する主な情報                                                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 各フロアトップページ     | フロア名                                                                                                                                   |
-| 作品ページ               | 作品名、サークル名、価格、クーポン利用価格、ジャンル、作品説明                                                                             |
-| 購入履歴ページ           | 購入履歴（購入日、作品名、サークル名、作品形式、価格）                                                                                     |
-| サークルページ           | 作品一覧（作品名、作品形式、クリエイター、価格）、<br>発売予告作品一覧（作品名、作品形式、クリエイター、発売予定時期、無料サンプルの有無） |
-| カートページ             | カート内作品（作品名、サークル名、作品形式、価格）、小計、クーポン情報                                                                     |
-| 購入後ダウンロードページ | 購入作品（作品名、サークル名、作品形式）                                                                                                   |
+| ページ               | 抽出する主な情報                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 各フロアトップページ | フロア名                                                                                                                                   |
+| 作品ページ           | 作品名、サークル名、価格、クーポン利用価格、ジャンル、作品説明                                                                             |
+| 購入履歴ページ       | 購入履歴（購入日、作品名、サークル名、作品形式、価格）                                                                                     |
+| サークルページ       | 作品一覧（作品名、作品形式、クリエイター、価格）、<br>発売予告作品一覧（作品名、作品形式、クリエイター、発売予定時期、無料サンプルの有無） |
+| カートページ         | カート内作品（作品名、サークル名、作品形式、価格）、小計、クーポン情報                                                                     |
+| 購入後ページ         | 購入作品（作品名、サークル名、作品形式）                                                                                                   |
 
 ## 使用技術
 
@@ -75,4 +77,22 @@ DLsiteの閲覧中にAIキャラクターがコメントをしてくれるブラ
 - パーソナライズやキャラクター作成・育成機能
 - 日本語以外の言語・円以外の通貨に対応
 - UI・UXの改善
-- APIの利用・アクセス制限など、セキュリティ面の改善
+- APIキー以外での認証など、セキュリティ面の改善
+- テストの追加
+
+## 主な作成コード
+
+- [background.ts](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/background.ts)
+- [popup](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/popup/App.tsx)
+- [sidepanel](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/sidepanel/App.tsx)
+- [options](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/options/App.tsx)
+- Content Scripts
+  - [トップページ](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/home.content.ts)
+  - [作品ページ](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/work.content.ts)
+  - [サークルページ](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/circle.content.ts)
+  - [購入履歴](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/userbuy.content.ts)
+  - [カート](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/cart.content.ts)
+  - [購入後ページ](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/entrypoints/download.content.ts)
+- 共通コード
+  - [utils/exports.ts](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/utils/exports.ts)（定数・関数）
+  - [utils/types.ts](https://github.com/saitokento/dlsite-browsing-companion/blob/main/src/utils/types.ts)（型定義）

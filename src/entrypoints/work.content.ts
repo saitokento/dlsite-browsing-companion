@@ -17,6 +17,7 @@ async function main() {
   }
 }
 
+/** 現在の作品ページから情報を抽出し、Backgroundへ送信する */
 function commentTriggered(): void {
   let work: Work;
   try {
@@ -30,6 +31,11 @@ function commentTriggered(): void {
   });
 }
 
+/**
+ * 作品ページからコメント生成に必要な情報を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 抽出した作品情報
+ */
 function extractWork(doc: Document): Work {
   const name: string = extractName(doc);
   const makerName: string = extractMakerName(doc);
@@ -53,6 +59,11 @@ function extractWork(doc: Document): Work {
   };
 }
 
+/**
+ * 作品名を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 作品名。取得できない場合は空文字列
+ */
 function extractName(doc: Document): string {
   return (
     doc
@@ -61,6 +72,11 @@ function extractName(doc: Document): string {
   );
 }
 
+/**
+ * サークル名を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns サークル名。取得できない場合は空文字列
+ */
 function extractMakerName(doc: Document): string {
   return (
     doc.querySelector<HTMLElement>("#work_maker .maker_name a")?.textContent ??
@@ -68,6 +84,11 @@ function extractMakerName(doc: Document): string {
   );
 }
 
+/**
+ * 割引後の価格を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 割引後の価格。取得できない場合は空文字列
+ */
 function extractPrice(doc: Document): string {
   return (
     doc
@@ -76,6 +97,11 @@ function extractPrice(doc: Document): string {
   );
 }
 
+/**
+ * 割引前の価格を抽出します。
+ * @param doc 抽出対象のドキュメント
+ * @returns 割引前の価格。取得できない場合は空文字列
+ */
 function extractOfficialPrice(doc: Document): string {
   return (
     doc
@@ -86,6 +112,11 @@ function extractOfficialPrice(doc: Document): string {
   );
 }
 
+/**
+ * クーポン利用時の価格を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns クーポン利用価格。表示されていない場合は`null`
+ */
 function extractCouponPrice(doc: Document): string | null {
   const priceElement = doc
     .querySelector<HTMLElement>(
@@ -99,6 +130,11 @@ function extractCouponPrice(doc: Document): string | null {
   return priceElement;
 }
 
+/**
+ * 価格の接頭辞と接尾辞を返す（現在は円のみを返す）
+ * @param _doc 抽出対象のドキュメント（現在は使用してない）
+ * @returns 接頭辞と接尾辞の配列（現在は["", "円"]）
+ */
 function extractPriceAffixes(_doc: Document): [string, string] {
   // const prefix: string =
   //   doc
@@ -118,6 +154,11 @@ function extractPriceAffixes(_doc: Document): [string, string] {
   return ["", "円"];
 }
 
+/**
+ * 作品のジャンル一覧を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns ジャンル名の一覧
+ */
 function extractGenres(doc: Document): string[] {
   return Array.from(
     doc.querySelectorAll<HTMLElement>("#work_outline .main_genre a"),
@@ -126,6 +167,11 @@ function extractGenres(doc: Document): string[] {
     .filter((genre) => genre !== "");
 }
 
+/**
+ * 作品説明をMarkdown形式へ変換して抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns Markdown形式の作品説明。取得できない場合は空文字列
+ */
 function extractDescription(doc: Document): string {
   const descriptionElement = doc.querySelector<HTMLElement>(
     'div[itemprop="description"].work_parts_container',
@@ -143,6 +189,10 @@ function extractDescription(doc: Document): string {
   return description;
 }
 
+/**
+ * プロトコル相対URLをHTTPSの絶対URLに正規化する
+ * @param root 正規化対象のDOMフラグメント
+ */
 function normalizeUrls(root: DocumentFragment): void {
   root
     .querySelectorAll<HTMLElement>('[href^="//"], [src^="//"]')
@@ -157,6 +207,7 @@ function normalizeUrls(root: DocumentFragment): void {
     });
 }
 
+/** HTMLをMarkdownに変換するためのTurndownインスタンス */
 const turndownService = new TurndownService({
   headingStyle: "atx",
   hr: "---",

@@ -14,6 +14,7 @@ function main(): void {
   });
 }
 
+/** 購入履歴ページから作品一覧を抽出し、バックグラウンドへ送信する */
 async function handleUserbuyTriggered(): Promise<void> {
   let userbuyWorkList: UserbuyWork[];
   if (!(await waitDomReady(10_000))) return;
@@ -28,6 +29,11 @@ async function handleUserbuyTriggered(): Promise<void> {
   });
 }
 
+/**
+ * 購入履歴の表から作品情報の一覧を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 購入済み作品の一覧
+ */
 function extractWorkList(doc: Document): UserbuyWork[] {
   const items = Array.from(
     doc.querySelectorAll<HTMLLIElement>(
@@ -58,6 +64,11 @@ function extractWorkList(doc: Document): UserbuyWork[] {
     });
 }
 
+/**
+ * 購入履歴行からプロダクトIDを抽出する
+ * @param item 対象の購入履歴行
+ * @returns プロダクトID。取得できない場合は空文字列
+ */
 function extractProductId(item: HTMLElement): string {
   return (
     item
@@ -66,12 +77,22 @@ function extractProductId(item: HTMLElement): string {
   );
 }
 
+/**
+ * 購入履歴行から作品カテゴリ一覧を抽出する
+ * @param item 対象の購入履歴行
+ * @returns 作品カテゴリの一覧
+ */
 function extractGenres(item: HTMLElement): string[] {
   return Array.from(item.querySelectorAll<HTMLElement>(".work_genre span"))
     .map((span) => span.textContent || "")
     .filter(Boolean);
 }
 
+/**
+ * 購入履歴行から価格の数値部分と通貨の接頭辞・接尾辞（現在は円のみ）を返す
+ * @param item 対象の購入履歴行
+ * @returns 価格、接頭辞・接尾辞（現在は["", "円"]）の配列
+ */
 function extractPriceText(item: HTMLElement): string[] {
   const priceText =
     Array.from(item.querySelector("td.work_price")?.childNodes ?? [])

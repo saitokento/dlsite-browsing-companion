@@ -16,6 +16,7 @@ async function main() {
   }
 }
 
+/** 購入作品ページから作品情報を抽出し、Backgroundへ送信する */
 function commentTriggered(): void {
   let downloadWorkList: DownloadWork[];
   try {
@@ -29,6 +30,11 @@ function commentTriggered(): void {
   });
 }
 
+/**
+ * 購入作品の表から作品情報を抽出する
+ * @param doc 抽出対象のドキュメント
+ * @returns 購入作品の一覧
+ */
 function extractWorkList(doc: Document): DownloadWork[] {
   const items = Array.from(
     doc.querySelectorAll<HTMLLIElement>("#download_work_list tr"),
@@ -51,6 +57,11 @@ function extractWorkList(doc: Document): DownloadWork[] {
     });
 }
 
+/**
+ * 作品リンクからプロダクトIDを抽出する
+ * @param item 対象の作品行
+ * @returns プロダクトID。取得できない場合は空文字列
+ */
 function extractProductId(item: HTMLElement): string {
   return (
     item
