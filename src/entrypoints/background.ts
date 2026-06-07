@@ -448,7 +448,7 @@ async function generateComment<U extends Usecase>(
     characterId,
     usecase,
     payload: payload,
-    ...(previousResponseId ? { previousResponseId } : {}),
+    previousResponseId: previousResponseId ?? null,
   });
 
   if (isStreaming) {
